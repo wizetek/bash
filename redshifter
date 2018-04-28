@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# redshifter
+# 2018/03/13 Tom Wizetek
+#
+# Use with 'redshift' http://jonls.dk/redshift/
+# Bind to keyboard shortcuts
+#
+# syntax:
+#	redshifter [argument]
+#
+# where [argument] is:
+#	-		decrease color temperature by 100K
+#	+		increase color temperature by 100K
+#	=		set maximum temperature
+#	(blank/other)	cycle through presets:
+#			6500K = Daylight
+#			5500K = Sunlight
+#			4200K = Fluorescent
+#			3400K = Halogen
+#			2700K = Incandescent
+#			2300K = Dim Incandescent
+#			1900K = Candle
+#			1200K = Ember
+#
+
+_COLORS=(6500 5500 4200 3400 2700 2300 1900 1200)
+_MAXTEMP=${_COLORS[0]}
+_MINTEMP=${_COLORS[-1]}
+_TEMPFILE="/tmp/${USER}-$(basename $0)"
+
+if [[ -f ${_TEMPFILE} ]]
+then
+  read -r _TEMP < ${_TEMPFILE}
+else
+  _TEMP=${_MAXTEMP}
+fi
+
+case "$1" in
+"+")
+  if [[ ${_TEMP} -lt ${_MAXTEMP} ]]
+  then
+    ((_TEMP+=100))
+  fi
+  ;;
+"-")
+  if [[ ${_TEMP} -gt ${_MINTEMP} ]]
+  then
+    ((_TEMP-=100))
+  fi
+  ;;
+"=")
+  _TEMP=${_MAXTEMP}
+  ;;
+*)
+  for T in ${_COLORS[@]}
+  do
+    if [[ ${T} -lt ${_TEMP} ]]
+    then
+      break
+    # _TEMP=1200, T=6500
+    elif [[ ${_TEMP} -eq ${_MINTEMP} ]]
+    then
+      break
+    fi
+  done
+  # set _TEMP from array
+  _TEMP=${T}
+  ;;
+esac
+
+redshift -O ${_TEMP}
+echo ${_TEMP} > ${_TEMPFILE}
+
+#eof
