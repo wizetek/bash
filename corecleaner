@@ -85,7 +85,7 @@ then
   fi
 fi
 
-echo -en "\nFinding $(tput bold)core$(tput sgr0) files..."
+echo -n "Finding 'core' files..."
 # Find files named core or core.1(...)
 find ${_LEVEL} -type f -name 'core' -fprint ${_LIST} -o -type f -regex '.*/core\.[0-9]*' -fprint ${_LIST} 2>/dev/null
 echo -e " done\n"
