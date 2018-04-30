@@ -50,7 +50,7 @@ case $1 in
   -a|--all)
   if [ -f ${_LIST} ]
   then
-    xargs -a ${_LIST} -d "\n" ls -shS1
+    xargs -r -a ${_LIST} -d "\n" ls -shS1
     exit 0
   else
     echo -e "\nRun a search without $1 first to generate a list.\n"
