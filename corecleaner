@@ -1,0 +1,98 @@
+#!/bin/bash
+
+#
+# corecleaner
+#
+# Find and remove 'core' files
+# 2018-04-27 Tom Wizetek
+#
+
+_LIST="/tmp/$(basename $0)-${USER}.list"
+_LEVEL='/home'
+_ACTION='rm --interactive'
+
+usage()
+{
+  cat << _USAGE
+
+Usage:
+
+  $(basename $0) [option] [path]
+
+Options:
+
+  -f,--force            force removal without confirmation
+  -l,--list             list instead of removing
+  -h,--help             show this help
+
+/home is the default path if not specified.
+Search results are saved in /tmp/$(basename $0)-<user>.list
+
+Examples:
+
+  $(basename $0)           - find core files in /home and ask before removing
+  $(basename $0) -f        - look in /home and remove without asking
+  $(basename $0) -f /tmp   - look in /tmp and remove without asking
+  $(basename $0) -l /      - look in / and only list files
+
+_USAGE
+}
+
+case $1 in
+  -f|--force)
+  _ACTION='rm --force --verbose'
+  shift
+;;
+  -l|--list)
+  _ACTION='echo'
+  shift
+;;
+  -h|--help)
+  usage
+  exit 0
+;;
+esac
+
+# Is there a path argument?
+if [[ $1 != "" ]]
+then
+  # Is it a valid directory?
+  if [ -d $1 ]
+  then
+    _LEVEL=$1
+  else
+    usage
+    exit 1
+  fi
+fi
+
+echo -en "\nFinding $(tput bold)core$(tput sgr0) files..."
+# Find files named core or core.1(...)
+find ${_LEVEL} -type f -name 'core' -fprint ${_LIST} -o -type f -regex '.*/core\.[0-9]*' -fprint ${_LIST} 2>/dev/null
+echo -e "\ndone\n"
+
+# Prevent loop split on spaces in path
+_OLDIFS=$IFS
+IFS=$'\n'
+
+for _CORE in $(cat ${_LIST})
+do
+  # Is it really core?
+  _TYPE=$(file "${_CORE}" | grep -o 'core file')
+  if [[ $_TYPE != "" ]]
+  then
+    # Running as root? Then become the file owner to remove it.
+    if [ $EUID -eq 0 ]
+    then
+      # Escape spaces for rm to handle paths with spaces.
+      # su will have separate environment, so rm can take arguments without having to restore IFS.
+      su - $(stat -c %U ${_CORE}) -c "${_ACTION} $(printf %q ${_CORE})"
+    else
+      # Restore IFS so that rm can handle arguments.
+      IFS=${_OLDIFS}
+      ${_ACTION} "${_CORE}"
+    fi
+  fi
+done
+
+#eof
