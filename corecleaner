@@ -53,7 +53,7 @@ case $1 in
     xargs -a ${_LIST} -d "\n" ls -shS1
     exit 0
   else
-    echo -e "\nRun a search without -a first to generate a list.\n"
+    echo -e "\nRun a search without $1 first to generate a list.\n"
     exit 1
   fi
 ;;
