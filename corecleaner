@@ -28,6 +28,12 @@ Options:
 /home is the default path if not specified.
 Search results are saved in /tmp/$(basename $0)-<user>.list
 
+_USAGE
+}
+
+examples()
+{
+  cat << _EXAMPLES
 Examples:
 
   $(basename $0)         search in /home and ask before removing each file
@@ -35,7 +41,7 @@ Examples:
   $(basename $0) -l /    only list results from /
   $(basename $0) -a      show last unverified matches
 
-_USAGE
+_EXAMPLES
 }
 
 case $1 in
@@ -53,12 +59,14 @@ case $1 in
     xargs -r -a ${_LIST} -d "\n" ls -shS1
     exit 0
   else
-    echo -e "\nRun a search without $1 first to generate a list.\n"
+    echo "Run a search without $1 first to generate a list."
+    usage
     exit 1
   fi
 ;;
   -h|--help)
   usage
+  examples
   exit 0
 ;;
 esac
@@ -71,6 +79,7 @@ then
   then
     _LEVEL=$1
   else
+    echo "Invalid argument"
     usage
     exit 1
   fi
@@ -79,7 +88,7 @@ fi
 echo -en "\nFinding $(tput bold)core$(tput sgr0) files..."
 # Find files named core or core.1(...)
 find ${_LEVEL} -type f -name 'core' -fprint ${_LIST} -o -type f -regex '.*/core\.[0-9]*' -fprint ${_LIST} 2>/dev/null
-echo -e "\ndone\n"
+echo -e " done\n"
 
 # Prevent loop split on spaces in path
 _OLDIFS=$IFS
