@@ -15,25 +15,25 @@ usage()
 {
   cat << _USAGE
 
-Usage:
-
-  $(basename $0) [option] [path]
+Usage:   $(basename $0) [option] [path]
 
 Options:
 
-  -f,--force            force removal without confirmation
-  -l,--list             list instead of removing
-  -h,--help             show this help
+  -f, --force         remove without confirmation
+  -l, -ls, --list     search and list only, don't remove
+  -a, --all           don't search, show all previous matches and file sizes
+                      (no file type and permissions verification)
+  -h, --help          this help
 
 /home is the default path if not specified.
 Search results are saved in /tmp/$(basename $0)-<user>.list
 
 Examples:
 
-  $(basename $0)           - find core files in /home and ask before removing
-  $(basename $0) -f        - look in /home and remove without asking
-  $(basename $0) -f /tmp   - look in /tmp and remove without asking
-  $(basename $0) -l /      - look in / and only list files
+  $(basename $0)         search in /home and ask before removing each file
+  $(basename $0) -f      look in /home and remove without asking
+  $(basename $0) -l /    only list results from /
+  $(basename $0) -a      show last unverified matches
 
 _USAGE
 }
@@ -43,9 +43,19 @@ case $1 in
   _ACTION='rm --force --verbose'
   shift
 ;;
-  -l|--list)
+  -l|-ls|--list)
   _ACTION='echo'
   shift
+;;
+  -a|--all)
+  if [ -f ${_LIST} ]
+  then
+    xargs -a ${_LIST} -d "\n" ls -shS1
+    exit 0
+  else
+    echo -e "\nRun a search without -a first to generate a list.\n"
+    exit 1
+  fi
 ;;
   -h|--help)
   usage
