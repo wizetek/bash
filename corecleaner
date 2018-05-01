@@ -58,7 +58,7 @@ case $1 in
   then
     xargs -a ${_LIST} -d "\n" ls -shS1
   else
-    echo "No results from previous search."
+    echo "No results from previous search"
   fi
   exit 0
 ;;
