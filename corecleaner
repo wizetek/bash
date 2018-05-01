@@ -21,7 +21,7 @@ Options:
 
   -f, --force         remove without confirmation
   -l, -ls, --list     only list, don't remove
-  -a, --all           show file size of all previous search results
+  -a, --all           show previous unprocessed search results
                       (all matching, even if not real core file type)
   -h, --help          this help
 
@@ -38,8 +38,8 @@ Examples:
 
   $(basename $0)         search in /home and ask before removing each file
   $(basename $0) -f      look in /home and remove without asking
-  $(basename $0) -l /    list results from /
-  $(basename $0) -a      show unprocessed matches from last search
+  $(basename $0) -l /    look in / and list results
+  $(basename $0) -a      show all matches from last search
 
 _EXAMPLES
 }
@@ -50,7 +50,7 @@ case $1 in
   shift
 ;;
   -l|-ls|--list)
-  _ACTION='echo'
+  _ACTION='ls -sh'
   shift
 ;;
   -a|--all)
@@ -88,7 +88,7 @@ fi
 echo -n "Finding 'core' files..."
 # Find files named core or core.1(...)
 find ${_LEVEL} -type f -name 'core' -fprint ${_LIST} -o -type f -regex '.*/core\.[0-9]*' -fprint ${_LIST} 2>/dev/null
-echo -e " done\n"
+echo " done"
 
 # Prevent loop split on spaces in path
 _OLDIFS=$IFS
