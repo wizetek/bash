@@ -54,15 +54,13 @@ case $1 in
   shift
 ;;
   -a|--all)
-  if [ -f ${_LIST} ]
+  if [ -s ${_LIST} ]
   then
-    xargs -r -a ${_LIST} -d "\n" ls -shS1
-    exit 0
+    xargs -a ${_LIST} -d "\n" ls -shS1
   else
-    echo "No previous search results. Run without $1 first to generate a list."
-    usage
-    exit 1
+    echo "No results from previous search."
   fi
+  exit 0
 ;;
   -h|--help)
   usage
