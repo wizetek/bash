@@ -13,10 +13,10 @@ _usage()
 {
 cat << _USAGE
 
-usage:    $(basename ${0}) [-c] [-r] path
+usage:   $(basename ${0}) [-c] [-r] path
 
--c, --check     Check if match is a real core file type
--r, --remove    Ask to remove files
+ -c, --check    Check if match is a real core file type
+ -r, --remove   Ask to remove files
 _USAGE
 }
 
