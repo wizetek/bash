@@ -1,0 +1,89 @@
+#!/bin/bash
+
+#
+# corefinder
+#
+# 2018/05/03 Tom Wizetek
+#
+
+_DIR=${1}
+_CMD='ls -sh'
+
+_usage()
+{
+cat << _USAGE
+
+usage:    $(basename ${0}) [-c] [-r] path
+
+-c, --check     Check if match is a real core file type
+-r, --remove    Ask to remove files
+_USAGE
+}
+
+# First argument
+case ${1} in
+-c|--check)
+  _DIR=${2}
+  _CHECK=1
+;;
+-r|-rm|--remove)
+  _DIR=${2}
+  _CMD='rm -iv'
+;;
+-h|--help)
+  _usage
+  exit 0
+;;
+-*)
+  echo "Invalid argument"
+  _usage
+  exit 1
+;;
+esac
+
+# Second argument
+case ${2} in
+-c|--check)
+  _DIR=${3}
+  _CHECK=1
+;;
+-r|-rm|--remove)
+  _DIR=${3}
+  _CMD='rm -iv'
+;;
+esac
+
+# Path supplied?
+if [ -z ${_DIR} ]
+then
+  echo "Missing path"
+  _usage
+  exit 1
+fi
+
+# Valid path?
+if [ ! -d ${_DIR} ]
+then
+  echo "Invalid path"
+  _usage
+  exit 1
+fi
+
+echo "Searching in ${_DIR}..."
+
+if [[ $_CHECK = 1 ]]
+then
+# Match file name and check file type for core
+  find ${_DIR} -type f -name 'core' -exec sh -c 'file {} | grep -oq "core file"' \; -exec ${_CMD} '{}' \; \
+   -o -type f -regex '.*/core\.[0-9]*' -exec sh -c 'file {} | grep -oq "core file"' \; -exec ${_CMD} '{}' \; \
+   -o -not -readable -prune
+else
+# Match file name only
+  find ${_DIR} -type f -name 'core' -exec ${_CMD} '{}' \; \
+   -o -type f -regex '.*/core\.[0-9]*' -exec ${_CMD} '{}' \; \
+   -o -not -readable -prune
+fi
+
+echo "done"
+
+#eof
