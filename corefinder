@@ -71,7 +71,7 @@ fi
 
 echo "Searching in ${_DIR}..."
 
-if [[ $_CHECK = 1 ]]
+if [[ ${_CHECK} = 1 ]]
 then
 # Match file name and check file type for core
   find ${_DIR} -type f -name 'core' -exec sh -c 'file "{}" | grep -oq "core file"' \; -exec ${_CMD} '{}' \; \
