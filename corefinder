@@ -69,7 +69,7 @@ then
   exit 1
 fi
 
-echo "Searching in ${_DIR}..."
+echo "Searching in ${_DIR}"
 
 if [[ ${_CHECK} = 1 ]]
 then
