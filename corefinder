@@ -74,12 +74,12 @@ echo "Searching in ${_DIR}..."
 if [[ ${_CHECK} = 1 ]]
 then
 # Match file name and check file type for core
-  find "${_DIR}" -type f -name 'core' -exec sh -c 'file "{}" | grep -oq "core file"' \; -exec ${_CMD} '{}' \; \
+  find "${_DIR}" -ignore_readdir_race -type f -name 'core' -exec sh -c 'file "{}" | grep -oq "core file"' \; -exec ${_CMD} '{}' \; \
    -o -type f -regex '.*/core\.[0-9]*' -exec sh -c 'file "{}" | grep -oq "core file"' \; -exec ${_CMD} '{}' \; \
    -o -not -readable -prune
 else
 # Match file name only
-  find "${_DIR}" -type f -name 'core' -exec ${_CMD} '{}' \; \
+  find "${_DIR}" -ignore_readdir_race -type f -name 'core' -exec ${_CMD} '{}' \; \
    -o -type f -regex '.*/core\.[0-9]*' -exec ${_CMD} '{}' \; \
    -o -not -readable -prune
 fi
