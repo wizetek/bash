@@ -34,57 +34,57 @@ buttonVolUpHold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
 evtest ${inputDevice} | while read line; do
 	case ${line} in
 		${buttonPower})
-		# Put your actions instead of 'echo' here
-		echo "Power"
-		;;
+			# Put your actions instead of 'echo' here
+			echo "Power"
+			;;
 		${buttonHome})
-		echo "Home"
-		;;
+			echo "Home"
+			;;
 		${buttonUp})
-		echo "Up"
-		;;
+			echo "Up"
+			;;
 		${buttonUpHold})
-		echo "holding Up"
-		;;
+			echo "holding Up"
+			;;
 		${buttonDown})
-		echo "Down"
-		;;
+			echo "Down"
+			;;
 		${buttonDownHold})
-		echo "holding Down"
-		;;
+			echo "holding Down"
+			;;
 		${buttonLeft})
-		echo "Left"
-		;;
+			echo "Left"
+			;;
 		${buttonLeftHold})
-		echo "holding Left"
-		;;
+			echo "holding Left"
+			;;
 		${buttonRight})
-		echo "Right"
-		;;
+			echo "Right"
+			;;
 		${buttonRightHold})
-		echo "holding Right"
-		;;
+			echo "holding Right"
+			;;
 		${buttonEnter})
-		echo "Enter"
-		;;
+			echo "Enter"
+			;;
 		${buttonCompose})
-		echo "Compoose"
-		;;
+			echo "Compoose"
+			;;
 		${buttonEsc})
-		echo "Esc"
-		;;
+			echo "Esc"
+			;;
 		${buttonVolDown})
-		echo "VolDown"
-		;;
+			echo "VolDown"
+			;;
 		${buttonVolDownHold})
-		echo "holding VolDown"
-		;;
+			echo "holding VolDown"
+			;;
 		${buttonVolUp})
-		echo "VolUp"
-		;;
+			echo "VolUp"
+			;;
 		${buttonVolUpHold})
-		echo "holding VolUp"
-		;;
+			echo "holding VolUp"
+			;;
 	esac
 done
 
