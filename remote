@@ -1,0 +1,91 @@
+#!/bin/bash
+
+#
+# remote
+# 2019-01-12 Tom Wizetek
+#
+# Assign actions to a wireless remote
+# FM4 2.4Ghz USB / air mouse (from AliExpress)
+# Control things on a headless Raspberry Pi
+#
+# Requires the 'evtest' package installed
+#
+
+inputDevice='/dev/input/by-id/usb-DHS_USB_DOGLE-event-kbd'
+
+buttonPower="*type 1 (EV_KEY), code 116 (KEY_POWER), value 1"
+buttonHome="*type 1 (EV_KEY), code 172 (KEY_HOMEPAGE), value 1"
+buttonUp="*type 1 (EV_KEY), code 103 (KEY_UP), value 1"
+buttonUpHold="*type 1 (EV_KEY), code 103 (KEY_UP), value 2"
+buttonDown="*type 1 (EV_KEY), code 108 (KEY_DOWN), value 1"
+buttonDownHold="*type 1 (EV_KEY), code 108 (KEY_DOWN), value 2"
+buttonLeft="*type 1 (EV_KEY), code 105 (KEY_LEFT), value 1"
+buttonLeftHold="*type 1 (EV_KEY), code 105 (KEY_LEFT), value 2"
+buttonRight="*type 1 (EV_KEY), code 106 (KEY_RIGHT), value 1"
+buttonRightHold="*type 1 (EV_KEY), code 106 (KEY_RIGHT), value 2"
+buttonEnter="*type 1 (EV_KEY), code 28 (KEY_ENTER), value 1"
+buttonCompose="*type 1 (EV_KEY), code 127 (KEY_COMPOSE), value 1"
+buttonEsc="*type 1 (EV_KEY), code 1 (KEY_ESC), value 1"
+buttonVolDown="*type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 1"
+buttonVolDownHold="*type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 2"
+buttonVolUp="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 1"
+buttonVolUpHold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
+
+evtest ${inputDevice} | while read line; do
+	case ${line} in
+		$buttonPower)
+		# Put your actions here instead of 'echo'
+		echo "Power"
+		;;
+		$buttonHome)
+		echo "Home"
+		;;
+		$buttonUp)
+		echo "Up"
+		;;
+		$buttonUpHold)
+		echo "holding Up"
+		;;
+		$buttonDown)
+		echo "Down"
+		;;
+		$buttonDownHold)
+		echo "holding Down"
+		;;
+		$buttonLeft)
+		echo "Left"
+		;;
+		$buttonLeftHold)
+		echo "holding Left"
+		;;
+		$buttonRight)
+		echo "Right"
+		;;
+		$buttonRightHold)
+		echo "holding Right"
+		;;
+		$buttonEnter)
+		echo "Enter"
+		;;
+		$buttonCompose)
+		echo "Compoose"
+		;;
+		$buttonEsc)
+		echo "Esc"
+		;;
+		$buttonVolDown)
+		echo "VolDown"
+		;;
+		$buttonVolDownHold)
+		echo "holding VolDown"
+		;;
+		$buttonVolUp)
+		echo "VolUp"
+		;;
+		$buttonVolUpHold)
+		echo "holding VolUp"
+		;;
+	esac
+done
+
+# eof
