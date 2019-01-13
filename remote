@@ -5,7 +5,7 @@
 # 2019-01-12 Tom Wizetek
 #
 # Assign actions to a wireless remote
-# FM4 2.4Ghz USB / air mouse (from AliExpress)
+# FM4 2.4GHz USB / air mouse (from AliExpress)
 # Control things on a headless Raspberry Pi
 #
 # Requires the 'evtest' package installed
