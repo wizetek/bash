@@ -33,56 +33,56 @@ buttonVolUpHold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
 
 evtest ${inputDevice} | while read line; do
 	case ${line} in
-		$buttonPower)
+		${buttonPower})
 		# Put your actions here instead of 'echo'
 		echo "Power"
 		;;
-		$buttonHome)
+		${buttonHome})
 		echo "Home"
 		;;
-		$buttonUp)
+		${buttonUp})
 		echo "Up"
 		;;
-		$buttonUpHold)
+		${buttonUpHold})
 		echo "holding Up"
 		;;
-		$buttonDown)
+		${buttonDown})
 		echo "Down"
 		;;
-		$buttonDownHold)
+		${buttonDownHold})
 		echo "holding Down"
 		;;
-		$buttonLeft)
+		${buttonLeft})
 		echo "Left"
 		;;
-		$buttonLeftHold)
+		${buttonLeftHold})
 		echo "holding Left"
 		;;
-		$buttonRight)
+		${buttonRight})
 		echo "Right"
 		;;
-		$buttonRightHold)
+		${buttonRightHold})
 		echo "holding Right"
 		;;
-		$buttonEnter)
+		${buttonEnter})
 		echo "Enter"
 		;;
-		$buttonCompose)
+		${buttonCompose})
 		echo "Compoose"
 		;;
-		$buttonEsc)
+		${buttonEsc})
 		echo "Esc"
 		;;
-		$buttonVolDown)
+		${buttonVolDown})
 		echo "VolDown"
 		;;
-		$buttonVolDownHold)
+		${buttonVolDownHold})
 		echo "holding VolDown"
 		;;
-		$buttonVolUp)
+		${buttonVolUp})
 		echo "VolUp"
 		;;
-		$buttonVolUpHold)
+		${buttonVolUpHold})
 		echo "holding VolUp"
 		;;
 	esac
