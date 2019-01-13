@@ -34,7 +34,7 @@ buttonVolUpHold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
 evtest ${inputDevice} | while read line; do
 	case ${line} in
 		${buttonPower})
-		# Put your actions here instead of 'echo'
+		# Put your actions instead of 'echo' here
 		echo "Power"
 		;;
 		${buttonHome})
