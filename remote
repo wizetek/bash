@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #
 # remote
 # 2019-01-12 Tom Wizetek
@@ -9,81 +8,80 @@
 # Control things on a headless Raspberry Pi
 #
 # Requires the 'evtest' package installed
-#
 
-inputDevice='/dev/input/by-id/usb-DHS_USB_DOGLE-event-kbd'
+input_device='/dev/input/by-id/usb-DHS_USB_DOGLE-event-kbd'
 
-buttonPower="*type 1 (EV_KEY), code 116 (KEY_POWER), value 1"
-buttonHome="*type 1 (EV_KEY), code 172 (KEY_HOMEPAGE), value 1"
-buttonUp="*type 1 (EV_KEY), code 103 (KEY_UP), value 1"
-buttonUpHold="*type 1 (EV_KEY), code 103 (KEY_UP), value 2"
-buttonDown="*type 1 (EV_KEY), code 108 (KEY_DOWN), value 1"
-buttonDownHold="*type 1 (EV_KEY), code 108 (KEY_DOWN), value 2"
-buttonLeft="*type 1 (EV_KEY), code 105 (KEY_LEFT), value 1"
-buttonLeftHold="*type 1 (EV_KEY), code 105 (KEY_LEFT), value 2"
-buttonRight="*type 1 (EV_KEY), code 106 (KEY_RIGHT), value 1"
-buttonRightHold="*type 1 (EV_KEY), code 106 (KEY_RIGHT), value 2"
-buttonEnter="*type 1 (EV_KEY), code 28 (KEY_ENTER), value 1"
-buttonCompose="*type 1 (EV_KEY), code 127 (KEY_COMPOSE), value 1"
-buttonEsc="*type 1 (EV_KEY), code 1 (KEY_ESC), value 1"
-buttonVolDown="*type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 1"
-buttonVolDownHold="*type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 2"
-buttonVolUp="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 1"
-buttonVolUpHold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
+button_power="*type 1 (EV_KEY), code 116 (KEY_POWER), value 1"
+button_home="*type 1 (EV_KEY), code 172 (KEY_HOMEPAGE), value 1"
+button_up="*type 1 (EV_KEY), code 103 (KEY_UP), value 1"
+button_up_hold="*type 1 (EV_KEY), code 103 (KEY_UP), value 2"
+button_down="*type 1 (EV_KEY), code 108 (KEY_DOWN), value 1"
+button_down_hold="*type 1 (EV_KEY), code 108 (KEY_DOWN), value 2"
+button_left="*type 1 (EV_KEY), code 105 (KEY_LEFT), value 1"
+button_left_hold="*type 1 (EV_KEY), code 105 (KEY_LEFT), value 2"
+button_right="*type 1 (EV_KEY), code 106 (KEY_RIGHT), value 1"
+button_right_hold="*type 1 (EV_KEY), code 106 (KEY_RIGHT), value 2"
+button_enter="*type 1 (EV_KEY), code 28 (KEY_ENTER), value 1"
+button_compose="*type 1 (EV_KEY), code 127 (KEY_COMPOSE), value 1"
+button_esc="*type 1 (EV_KEY), code 1 (KEY_ESC), value 1"
+button_voldown="*type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 1"
+button_voldown_hold="*type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 2"
+button_volup="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 1"
+button_volup_hold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
 
-evtest ${inputDevice} | while read line; do
+evtest ${input_device} | while read line; do
 	case ${line} in
-		${buttonPower})
-			# Put your actions instead of 'echo' here
+		${button_power})
 			echo "Power"
 			;;
-		${buttonHome})
+		${button_home})
 			echo "Home"
 			;;
-		${buttonUp})
+		${button_up})
 			echo "Up"
 			;;
-		${buttonUpHold})
+		${button_up_hold})
 			echo "holding Up"
 			;;
-		${buttonDown})
+		${button_down})
 			echo "Down"
 			;;
-		${buttonDownHold})
+		${button_down_hold})
 			echo "holding Down"
 			;;
-		${buttonLeft})
+		${button_left})
 			echo "Left"
 			;;
-		${buttonLeftHold})
+		${button_left_hold})
 			echo "holding Left"
 			;;
-		${buttonRight})
+		${button_right})
 			echo "Right"
 			;;
-		${buttonRightHold})
+		${button_right_hold})
 			echo "holding Right"
 			;;
-		${buttonEnter})
-			echo "Enter"
+		${button_enter})
+			echo "OK"
 			;;
-		${buttonCompose})
-			echo "Compoose"
+		${button_compose})
+			echo "Menu"
 			;;
-		${buttonEsc})
-			echo "Esc"
+		${button_esc})
+			echo "Back"
 			;;
-		${buttonVolDown})
-			echo "VolDown"
+		${button_voldown})
+			amixer -q set PCM 1dB-
 			;;
-		${buttonVolDownHold})
-			echo "holding VolDown"
+		${button_voldown_hold})
+			#amixer -q set PCM 0%
+			amixer -q set PCM 1dB-
 			;;
-		${buttonVolUp})
-			echo "VolUp"
+		${button_volup})
+			amixer -q set PCM 1dB+
 			;;
-		${buttonVolUpHold})
-			echo "holding VolUp"
+		${button_volup_hold})
+			amixer -q set PCM 1dB+
 			;;
 	esac
 done
