@@ -1,10 +1,7 @@
 #!/bin/bash
-
 #
 # corefinder
-#
 # 2018/05/03 Tom Wizetek
-#
 
 _DIR=${1}
 _CMD='ls -sh'
@@ -86,4 +83,4 @@ fi
 
 echo "done"
 
-#eof
+# eof
