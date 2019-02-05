@@ -1,0 +1,201 @@
+#!/bin/bash
+#
+# Noise generator and SoundFont rompler for a headless Raspberry Pi
+# 2019-01-13 Tom Wizetek
+#
+# Required packages: sox, fluidsynth, jackd
+#
+# jackd options:
+# -P 70		= realtime priority (scheduler)
+# -p 16		= max ports to manage; default=256
+# -t 2000	= client timeout; jack default=500 (ms)
+# -d alsa	= ALSA driver backend
+# ALSA backend options:
+# -d hw:CODEC	= Behringer USB Audio; instead of e.g. hw:1
+# -r 48000	= sample rate; jack default=48000, fluidsynth default=44100
+# -p 1024	= frames; default=1024; lower value = lower latency but risk xruns
+# -n 3		= periods; default=2; recommended=3 for USB Audio
+# -s		= soft mode = ignore xruns and don't disconnect unresponsive ports
+#
+# fluidsynth options:
+# -s		= start as server
+# -i		= no shell; default=yes (shell)
+# -a alsa|jack	= audio driver
+# -j		= connect jack outputs
+# -r 48000	= sample rate; default=44100
+# -z 512	= size of each audio buffer (for ALSA, not jack)
+# -c 3		= number of audio buffers (for ALSA, not jack)
+# -g 1		= gain; default=0.2; WARNING: too much boost = distortion
+# -C 0		= turn off chorus
+# -R 0		= turn off reverb
+# -l		= don't connect to LASH server
+# -o abcdef	 define a setting; HERE: synth.polyphony; default=256
+
+#
+# variables
+#
+audio_device='hw:CODEC' # cat /proc/asound/cards
+midi_controller_1="Alesis Q88" # aconnect -i
+midi_controller_2="Alesis Q88 MIDI 1"
+piano_soundfont='/usr/local/share/sf2/grand-piano-YDP-20160804.sf2' # https://freepats.zenvoid.org/
+rompler_soundfont='/usr/local/share/sf2/SGM-V2.01.sf2' # https://sourceforge.net/projects/androidframe/files/soundfonts/
+sox_args='-q -V0 -G -n synth'
+noise_type=('whitenoise vol -16dB' 'pinknoise' 'brownnoise' 'brownnoise lowpass 500 vol -10dB')
+
+#
+# functions
+#
+midiConnect() {
+	midi_in_1=$(aconnect -i | awk "/client.*${midi_controller_1}/"'{print $2}')
+	midi_in_2=$(aconnect -i | awk "/${midi_controller_2}/"'{print $1}')
+	midi_in="${midi_in_1}${midi_in_2}"
+
+	midi_out_1=$(aconnect -o | awk '/client.*FLUID Synth/ {print $2}')
+	midi_out_2=$(aconnect -o | awk '/Synth input port/ {print $1}')
+	midi_out="${midi_out_1}${midi_out_2}"
+
+	aconnect ${midi_in} ${midi_out}
+}
+
+fluidAlsa() {
+	fluidsynth -s -i -a alsa -o audio.alsa.device=${audio_device} -g1 -r48000 -z512 -c3 -C0 -R0 -l -o synth.polyphony=64 ${1} &
+	sleep 5
+	midiConnect
+}
+
+fluidJack() {
+	jackd -P70 -p16 -t2000 -d alsa -d ${audio_device} -r48000 -p512 -n3 -s &
+	sleep 5
+	fluidsynth -s -i -a jack -j -g1 -r48000 -C0 -R0 -l -o synth.polyphony=64 ${1} &
+	sleep 5
+	midiConnect
+}
+
+midiKill() {
+	aconnect -x
+	sleep 2
+
+	pkill fluidsynth
+	sleep 5
+	pkill -9 fluidsynth
+
+	pkill jackd
+	sleep 5
+	pkill -9 jackd
+}
+
+noiseToggle() {
+	# kill the noise if:
+	# - noise is already playing, or
+	# - argument 'OFF' is given
+	if [[ ! -z $(pgrep play) || ${1} == "OFF" ]]; then
+		pkill play
+	else
+		# nothing is playing
+		# call argument passed to this function
+		${1}
+	fi
+}
+
+noiseGenerator() {
+	play ${sox_args} ${noise_type[0]} &
+	play ${sox_args} ${noise_type[1]} &
+	play ${sox_args} ${noise_type[2]} &
+}
+
+noiseCyclePreset() {
+	preset_count=${#noise_type[@]}
+	preset_first=${noise_type[0]}
+	preset_last=${noise_type[-1]}
+	preset_saved="/tmp/$(basename $0).sav"
+
+	# check for saved presets
+	# if empty, set to zero
+	if [[ -f $preset_saved ]]; then
+		read -r preset_current < ${preset_saved}
+	else
+		preset_current=0
+	fi
+
+	# go to next preset
+	# wrap around at the end
+	preset_current=$(($preset_current + 1))
+	if [[ $preset_current > 7 ]]; then
+		preset_current=1
+	fi
+
+	# save current preset to file
+	echo ${preset_current} > ${preset_saved}
+
+	# 7 preset combinations
+	# 0, 1, 2, 0+1, 0+2, 1+2, 0+1+2
+	case ${preset_current} in
+		1)
+			play ${sox_args} ${noise_type[0]} &
+			;;
+		2)
+			play ${sox_args} ${noise_type[1]} &
+			;;
+		3)
+			play ${sox_args} ${noise_type[2]} &
+			;;
+		4)
+			play ${sox_args} ${noise_type[0]} &
+			play ${sox_args} ${noise_type[1]} &
+			;;
+		5)
+			play ${sox_args} ${noise_type[0]} &
+			play ${sox_args} ${noise_type[2]} &
+			;;
+		6)
+			play ${sox_args} ${noise_type[1]} &
+			play ${sox_args} ${noise_type[2]} &
+			;;
+		7)
+			play ${sox_args} ${noise_type[0]} &
+			play ${sox_args} ${noise_type[1]} &
+			play ${sox_args} ${noise_type[2]} &
+			;;
+	esac
+}
+
+#
+# main
+#
+case ${1} in
+	-n|--noise)
+		noiseToggle noiseGenerator
+		;;
+	-c|--cycle)
+		noiseToggle OFF
+		noiseCyclePreset
+		;;
+	-p|--piano)
+		midiKill
+		fluidAlsa ${piano_soundfont}
+		;;
+	-r|--rompler)
+		midiKill
+		fluidAlsa ${rompler_soundfont}
+		;;
+	-j|--piano-jack)
+		midiKill
+		fluidJack ${piano_soundfont}
+		;;
+	-o|--rompler-jack)
+		midiKill
+		fluidJack ${rompler_soundfont}
+		;;
+	-m|--midi)
+		midiConnect
+		;;
+	-k|--kill)
+		midiKill
+		;;
+	*)
+		echo "Bad argument"
+		exit 1
+		;;
+esac
+
+# eof
