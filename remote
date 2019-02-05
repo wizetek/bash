@@ -32,10 +32,10 @@ button_volup_hold="*type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 2"
 evtest ${input_device} | while read line; do
 	case ${line} in
 		${button_power})
-			echo "Power"
+			audio.sh --noise
 			;;
 		${button_home})
-			echo "Home"
+			audio.sh --cycle
 			;;
 		${button_up})
 			echo "Up"
@@ -53,22 +53,22 @@ evtest ${input_device} | while read line; do
 			echo "Left"
 			;;
 		${button_left_hold})
-			echo "holding Left"
+			audio.sh --piano-jack
 			;;
 		${button_right})
 			echo "Right"
 			;;
 		${button_right_hold})
-			echo "holding Right"
+			audio.sh --rompler-jack
 			;;
 		${button_enter})
-			echo "OK"
+			audio.sh --midi
 			;;
 		${button_compose})
-			echo "Menu"
+			audio.sh --piano
 			;;
 		${button_esc})
-			echo "Back"
+			audio.sh --rompler
 			;;
 		${button_voldown})
 			amixer -q set PCM 1dB-
