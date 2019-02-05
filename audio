@@ -104,14 +104,14 @@ noiseGenerator() {
 }
 
 noiseCyclePreset() {
-	preset_count=${#noise_type[@]}
-	preset_first=${noise_type[0]}
-	preset_last=${noise_type[-1]}
+	#preset_count=${#noise_type[@]}
+	#preset_first=${noise_type[0]}
+	#preset_last=${noise_type[-1]}
 	preset_saved="/tmp/$(basename $0).sav"
 
 	# check for saved presets
 	# if empty, set to zero
-	if [[ -f $preset_saved ]]; then
+	if [[ -f ${preset_saved} ]]; then
 		read -r preset_current < ${preset_saved}
 	else
 		preset_current=0
@@ -119,8 +119,8 @@ noiseCyclePreset() {
 
 	# go to next preset
 	# wrap around at the end
-	preset_current=$(($preset_current + 1))
-	if [[ $preset_current > 7 ]]; then
+	preset_current=$((${preset_current} + 1))
+	if [[ ${preset_current} > 7 ]]; then
 		preset_current=1
 	fi
 
