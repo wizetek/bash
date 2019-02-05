@@ -119,7 +119,7 @@ noiseCyclePreset() {
 
 	# go to next preset
 	# wrap around at the end
-	preset_current=$((${preset_current} + 1))
+	preset_current=$(( ${preset_current} + 1 ))
 	if [[ ${preset_current} > 7 ]]; then
 		preset_current=1
 	fi
