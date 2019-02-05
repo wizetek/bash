@@ -19,7 +19,7 @@
 #
 # fluidsynth options:
 # -s		= start as server
-# -i		= no shell; default=yes (shell)
+# -i		= no shell; default = use shell
 # -a alsa|jack	= audio driver
 # -j		= connect jack outputs
 # -r 48000	= sample rate; default=44100
@@ -29,7 +29,7 @@
 # -C 0		= turn off chorus
 # -R 0		= turn off reverb
 # -l		= don't connect to LASH server
-# -o abcdef	 define a setting; HERE: synth.polyphony; default=256
+# -o abcdef	= define a setting; HERE: synth.polyphony; default=256
 
 #
 # variables
