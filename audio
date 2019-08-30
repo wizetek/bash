@@ -40,7 +40,12 @@ midi_controller_2="Alesis Q88 MIDI 1"
 piano_soundfont='/usr/local/share/sf2/grand-piano-YDP-20160804.sf2' # https://freepats.zenvoid.org/
 rompler_soundfont='/usr/local/share/sf2/SGM-V2.01.sf2' # https://sourceforge.net/projects/androidframe/files/soundfonts/
 sox_args='-q -V0 -G -n synth'
-noise_type=('whitenoise vol -16dB' 'pinknoise' 'brownnoise' 'brownnoise lowpass 500 vol -10dB')
+noise_type=(
+        'whitenoise vol -14dB'
+        'pinknoise'
+        'brownnoise'
+        'brownnoise lowpass 500 vol -10dB'
+        'sine 60 vol -14dB')
 
 #
 # functions
@@ -98,9 +103,14 @@ noiseToggle() {
 }
 
 noiseGenerator() {
-	play ${sox_args} ${noise_type[0]} &
-	play ${sox_args} ${noise_type[1]} &
-	play ${sox_args} ${noise_type[2]} &
+        # white
+        play ${sox_args} ${noise_type[0]} &
+        # pink
+        play ${sox_args} ${noise_type[1]} &
+        # brown
+        play ${sox_args} ${noise_type[2]} &
+        # sine
+        play ${sox_args} ${noise_type[4]} &
 }
 
 noiseCyclePreset() {
