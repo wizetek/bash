@@ -1,0 +1,134 @@
+#!/bin/bash
+
+#
+# noise
+# 2019-09-01 Tom Wizetek
+#
+
+sox_args='-q -V0 -G -n synth'
+
+noise_type=(    'whitenoise vol -16dB'
+                'pinknoise'
+                'pinknoise lowpass 3000'
+                'pinknoise highpass 2000'
+                'brownnoise'
+                'brownnoise highpass 500'
+                'brownnoise lowpass 200'
+                'sine 60 vol -6dB'
+                'sine 90 sine 93 vol -16dB'     )
+
+noise_preset=(0 1 2 8)
+
+noiseList() {
+        noise_index=0
+        for i in "${noise_type[@]}"
+        do
+                echo "${noise_index}: ${i}"
+                (( noise_index++ ))
+        done
+}
+
+noisePlay() {
+        for i in ${noise_preset[@]}
+        do
+                play ${sox_args} ${noise_type[${i}]} &
+        done
+}
+
+noiseCycle() {
+        # TODO
+        #preset_count=${#noise_type[@]}
+        #preset_first=${noise_type[0]}
+        #preset_last=${noise_type[-1]}
+
+        preset_saved="/tmp/$(basename $0).sav"
+
+        # Check for saved presets. If empty, set to zero
+        if [[ -f ${preset_saved} ]]
+        then
+                read -r preset_current < ${preset_saved}
+        else
+                preset_current=0
+        fi
+
+        # Static number of presets for now = 7
+        # (see TODO above)
+        # Go to next preset. Wrap around at the end
+        preset_current=$(( ${preset_current} + 1 ))
+        if [[ ${preset_current} > 7 ]]
+        then
+                preset_current=1
+        fi
+
+        # Save current preset to file
+        echo ${preset_current} > ${preset_saved}
+
+        case ${preset_current} in
+                1)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[1]} &
+                        ;;
+                2)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[2]} &
+                        ;;
+                3)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[3]} &
+                        ;;
+                4)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[4]} &
+                        ;;
+                5)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[5]} &
+                        ;;
+                6)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[6]} &
+                        ;;
+                7)
+                        play ${sox_args} ${noise_type[0]} &
+                        play ${sox_args} ${noise_type[1]} &
+                        play ${sox_args} ${noise_type[4]} &
+                        ;;
+        esac
+}
+
+noiseKill() {
+        if [[ ! -z $(pgrep play) ]]
+        then
+                pkill play
+        else
+                echo "SoX is not currently playing"
+        fi
+}
+
+#
+# main
+#
+case ${1} in
+        -l)
+                noiseList
+                ;;
+        -n|--num)
+                # TODO move to a function and then call here
+                play ${sox_args} ${noise_type[${2}]} &
+                ;;
+        -c|--cycle)
+                noiseKill
+                sleep 1
+                noiseCycle
+                ;;
+        -q|--quit)
+                noiseKill
+                ;;
+        *)
+                noiseKill
+                sleep 1
+                noisePlay
+                ;;
+esac
+
+# eof
