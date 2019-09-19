@@ -1,9 +1,7 @@
 #!/bin/bash
-
 #
 # noise
 # 2019-09-01 Tom Wizetek
-#
 
 sox_args='-q -V0 -G -n synth'
 
@@ -15,9 +13,9 @@ noise_type=(    'whitenoise vol -16dB'
                 'brownnoise highpass 500'
                 'brownnoise lowpass 200'
                 'sine 60 vol -6dB'
-                'sine 90 sine 93 vol -16dB'     )
+                'sine 90 sine 91.9 vol -14dB'   )
 
-noise_preset=(0 1 2 8)
+noise_preset=(1 2 8)
 
 noiseList() {
         noise_index=0
