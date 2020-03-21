@@ -3,6 +3,7 @@
 # redshifter
 #
 # Front end for 'redshift' from http://jonls.dk/redshift/
+# Requires 'bc' for floating point math.
 # Optionally bind actions to DM/WM keyboard shortcuts.
 #
 # 2018-03-13, 2020-03-20 Tom Wizetek
@@ -15,7 +16,8 @@ echo << ENDHELP "
 [action]
   -		decrease color temperature by 100K
   +		increase color temperature by 100K
-  =		reset to default (but keep last value)
+  =		keep current value / no-op
+  /		reset all to default (but keep last saved value)
   1000-25000	set specific color temperature
   (blank)	cycle through presets:
 		  6500K = Daylight
@@ -29,26 +31,39 @@ echo << ENDHELP "
   -h, --help	show this message
 
 [brightness]
-  0.1-1.0	set brightness
+  -		decrease brightness by 0.1
+  +		increase brightness by 0.1
+  /		reset to default
+  0.1-1.0	set specific brightness value
 
 examples:
 
   $(basename ${0}) 3800 0.6
-  $(basename ${0}) 9000
+  $(basename ${0}) 3600 -
+  $(basename ${0}) = 0.7
+  $(basename ${0}) = +
+  $(basename ${0}) 4200
   $(basename ${0}) -
+  $(basename ${0}) = /
+  $(basename ${0}) /
 "
 ENDHELP
 }
 
+#
+# Variables
+#
 cmd_path="/usr/bin/redshift"
 cmd_arg_temp="-P -O"
 cmd_arg_brightness="-b"
 cmd_arg_reset="-x -v"
-temp_file="/tmp/$(basename ${0})-${UID}"
 color_array=(6500 5500 4200 3400 2700 2300 1900 1200)
-max_temp=${color_array[0]}
-min_temp=${color_array[-1]}
-set_brightness=1.0
+min_temp=1000
+max_temp=25000
+min_brightness=0.1
+max_brightness=1.0
+temp_file="/tmp/$(basename ${0})-${UID}"
+brightness_file="/tmp/$(basename ${0})_b-${UID}"
 
 if [[ -f ${temp_file} ]]
 then
@@ -57,11 +72,40 @@ else
   set_temp=${max_temp}
 fi
 
-if [[ -n ${2} ]]
+if [[ -f ${brightness_file} ]]
 then
-  set_brightness=${2}
+  read -r set_brightness < ${brightness_file}
+else
+  set_brightness=${max_brightness}
 fi
 
+#
+# Brightness
+#
+case ${2} in
+"-")
+  if [[ $(bc <<< "${set_brightness} > ${min_brightness}") -eq 1 ]]
+  then
+    set_brightness=$(bc <<< ${set_brightness}-.1)
+  fi
+  ;;
+"+")
+  if [[ $(bc <<< "${set_brightness} < ${max_brightness}") -eq 1 ]]
+  then
+    set_brightness=$(bc <<< ${set_brightness}+.1)
+  fi
+  ;;
+"/")
+  set_brightness=${max_brightness}
+  ;;
+[0-9]*)
+  set_brightness=${2}
+  ;;
+esac
+
+#
+# Color temperature
+#
 case ${1} in
 "-")
   if [[ ${set_temp} -gt ${min_temp} ]]
@@ -76,11 +120,14 @@ case ${1} in
   fi
   ;;
 "=")
-  ${cmd_path} ${cmd_arg_reset}
-  exit 0
+  : # no-op
   ;;
 [0-9]*)
   set_temp=${1}
+  ;;
+"/")
+  ${cmd_path} ${cmd_arg_reset}
+  exit 0
   ;;
 "")
   for array_item in ${color_array[@]}
@@ -89,7 +136,7 @@ case ${1} in
     then
       break
     # set_temp=1200, array_item=6500
-    elif [[ ${set_temp} -eq ${min_temp} ]]
+    elif [[ ${set_temp} -eq ${color_array[-1]} ]]
     then
       break
     fi
@@ -109,8 +156,16 @@ case ${1} in
   ;;
 esac
 
-echo "color_temp=${set_temp}, brightness=${set_brightness}"
+#
+# Execute
+#
 ${cmd_path} ${cmd_arg_temp} ${set_temp} ${cmd_arg_brightness} ${set_brightness}
+echo "color_temp=${set_temp}, brightness=${set_brightness}"
+
+#
+# Save values
+#
 echo ${set_temp} > ${temp_file}
+echo ${set_brightness} > ${brightness_file}
 
 # eof
