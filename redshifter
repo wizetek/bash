@@ -1,32 +1,50 @@
 #!/bin/bash
 #
 # redshifter
-# 2018/03/13 Tom Wizetek
 #
-# Use with 'redshift' http://jonls.dk/redshift/
-# Bind to keyboard shortcuts
+# 2018-03-13, 2020-03-20 Tom Wizetek
+# GPL license
 #
-# syntax:
-#	redshifter [argument]
-#
-# where [argument] is:
-#	-		decrease color temperature by 100K
-#	+		increase color temperature by 100K
-#	=		set maximum temperature
-#	(blank/other)	cycle through presets:
-#			6500K = Daylight
-#			5500K = Sunlight
-#			4200K = Fluorescent
-#			3400K = Halogen
-#			2700K = Incandescent
-#			2300K = Dim Incandescent
-#			1900K = Candle
-#			1200K = Ember
+# Install 'redshift' from http://jonls.dk/redshift/
+# Optionally bind actions to DM/WM keyboard shortcuts.
+
+showHelp() {
+echo << ENDHELP "
+  redshifter [action] [brightness]
+
+[action]
+  -		decrease color temperature by 100K
+  +		increase color temperature by 100K
+  =		reset to default (but keep last value)
+  1000-25000	set specific color temperature
+  (blank)	cycle through presets:
+		  6500K = Daylight
+		  5500K = Sunlight
+		  4200K = Fluorescent
+		  3400K = Halogen
+		  2700K = Incandescent
+		  2300K = Dim Incandescent
+		  1900K = Candle
+		  1200K = Ember
+  -h, --help	show this message
+
+[brightness]
+  0.1-1.0	set brightness
+
+examples:
+
+  redshifter 3800 0.6
+  redshifter 9000
+  redshifter -
+"
+ENDHELP
+}
 
 _COLORS=(6500 5500 4200 3400 2700 2300 1900 1200)
+_BRIGHTNESS=1.0
 _MAXTEMP=${_COLORS[0]}
 _MINTEMP=${_COLORS[-1]}
-_TEMPFILE="/tmp/${USER}-$(basename $0)"
+_TEMPFILE="/tmp/$(basename ${0})-${UID}"
 
 if [[ -f ${_TEMPFILE} ]]
 then
@@ -35,12 +53,15 @@ else
   _TEMP=${_MAXTEMP}
 fi
 
-case "$1" in
-"+")
-  if [[ ${_TEMP} -lt ${_MAXTEMP} ]]
-  then
-    ((_TEMP+=100))
-  fi
+if [[ ${2} != "" ]]
+then
+  _BRIGHTNESS=${2}
+fi
+
+case ${1} in
+"-h"|"--help")
+  showHelp
+  exit 0
   ;;
 "-")
   if [[ ${_TEMP} -gt ${_MINTEMP} ]]
@@ -48,8 +69,18 @@ case "$1" in
     ((_TEMP-=100))
   fi
   ;;
+"+")
+  if [[ ${_TEMP} -lt ${_MAXTEMP} ]]
+  then
+    ((_TEMP+=100))
+  fi
+  ;;
 "=")
-  _TEMP=${_MAXTEMP}
+  redshift -x -v
+  exit 0
+  ;;
+[0-9]*)
+  _TEMP=${1}
   ;;
 *)
   for T in ${_COLORS[@]}
@@ -68,7 +99,8 @@ case "$1" in
   ;;
 esac
 
-redshift -O ${_TEMP}
+echo "color_temp=${_TEMP}, brightness=${_BRIGHTNESS}"
+redshift -P -O ${_TEMP} -b ${_BRIGHTNESS}
 echo ${_TEMP} > ${_TEMPFILE}
 
 # eof
