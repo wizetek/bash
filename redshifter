@@ -2,32 +2,32 @@
 #
 # redshifter
 #
-# Front end for 'redshift' from http://jonls.dk/redshift/
+# Wrapper for 'redshift' http://jonls.dk/redshift/
 # Requires 'bc' for floating point math.
 # Optionally bind actions to DM/WM keyboard shortcuts.
 #
 # 2018-03-13, 2020-03-20 Tom Wizetek
-# GPL license
+# GPL
 
 showHelp() {
 echo << ENDHELP "
-  $(basename ${0}) [action] [brightness]
+  $(basename ${0}) [color] [brightness]
 
-[action]
+cycle through presets:
+		6500K = Daylight
+		5500K = Sunlight
+		4200K = Fluorescent
+		3400K = Halogen
+		2700K = Incandescent
+		2300K = Dim Incandescent
+		1900K = Candle
+		1200K = Ember
+[color]
   -		decrease color temperature by 100K
   +		increase color temperature by 100K
   =		keep current value / no-op
   /		reset all to default (but keep last saved value)
   1000-25000	set specific color temperature
-  (blank)	cycle through presets:
-		  6500K = Daylight
-		  5500K = Sunlight
-		  4200K = Fluorescent
-		  3400K = Halogen
-		  2700K = Incandescent
-		  2300K = Dim Incandescent
-		  1900K = Candle
-		  1200K = Ember
   -h, --help	show this message
 
 [brightness]
@@ -35,17 +35,6 @@ echo << ENDHELP "
   +		increase brightness by 0.1
   /		reset to default
   0.1-1.0	set specific brightness value
-
-examples:
-
-  $(basename ${0}) 3800 0.6
-  $(basename ${0}) 3600 -
-  $(basename ${0}) = 0.7
-  $(basename ${0}) = +
-  $(basename ${0}) 4200
-  $(basename ${0}) -
-  $(basename ${0}) = /
-  $(basename ${0}) /
 "
 ENDHELP
 }
@@ -107,6 +96,9 @@ esac
 # Color temperature
 #
 case ${1} in
+"=")
+  : # no-op
+  ;;
 "-")
   if [[ ${set_temp} -gt ${min_temp} ]]
   then
@@ -119,12 +111,8 @@ case ${1} in
     ((set_temp+=100))
   fi
   ;;
-"=")
-  : # no-op
-  ;;
 "/")
-  ${cmd_path} ${cmd_arg_reset}
-  exit 0
+  set_temp=${color_array[0]}
   ;;
 [0-9]*)
   set_temp=${1}
@@ -141,7 +129,6 @@ case ${1} in
       break
     fi
   done
-  # Set temp from array
   set_temp=${array_item}
   ;;
 "-h"|"--help")
