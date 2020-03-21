@@ -122,12 +122,12 @@ case ${1} in
 "=")
   : # no-op
   ;;
-[0-9]*)
-  set_temp=${1}
-  ;;
 "/")
   ${cmd_path} ${cmd_arg_reset}
   exit 0
+  ;;
+[0-9]*)
+  set_temp=${1}
   ;;
 "")
   for array_item in ${color_array[@]}
