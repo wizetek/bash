@@ -10,7 +10,7 @@
 
 showHelp() {
 echo << ENDHELP "
-  redshifter [action] [brightness]
+  $(basename ${0}) [action] [brightness]
 
 [action]
   -		decrease color temperature by 100K
@@ -33,9 +33,9 @@ echo << ENDHELP "
 
 examples:
 
-  redshifter 3800 0.6
-  redshifter 9000
-  redshifter -
+  $(basename ${0}) 3800 0.6
+  $(basename ${0}) 9000
+  $(basename ${0}) -
 "
 ENDHELP
 }
@@ -63,10 +63,6 @@ then
 fi
 
 case ${1} in
-"-h"|"--help")
-  showHelp
-  exit 0
-  ;;
 "-")
   if [[ ${set_temp} -gt ${min_temp} ]]
   then
@@ -86,7 +82,7 @@ case ${1} in
 [0-9]*)
   set_temp=${1}
   ;;
-*)
+"")
   for array_item in ${color_array[@]}
   do
     if [[ ${array_item} -lt ${set_temp} ]]
@@ -100,6 +96,16 @@ case ${1} in
   done
   # Set temp from array
   set_temp=${array_item}
+  ;;
+"-h"|"--help")
+  showHelp
+  exit 0
+  ;;
+*)
+  echo
+  echo "  $(basename ${0}) -h		for help"
+  echo
+  exit 1
   ;;
 esac
 
