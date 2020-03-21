@@ -98,7 +98,7 @@ case ${1} in
       break
     fi
   done
-  # set set_temp from array
+  # Set temp from array
   set_temp=${array_item}
   ;;
 esac
