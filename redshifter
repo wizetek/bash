@@ -28,13 +28,14 @@ cycle through presets:
   =		keep current value / no-op
   /		reset to default
   1000-25000	set specific color temperature
-  -h, --help	show this message
 
 [brightness]
   -		decrease brightness by 0.1
   +		increase brightness by 0.1
   /		reset to default
   0.1-1.0	set specific brightness value
+
+-h, --help	show this message
 "
 ENDHELP
 }
