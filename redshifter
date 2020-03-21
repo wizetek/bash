@@ -45,7 +45,6 @@ ENDHELP
 cmd_path="/usr/bin/redshift"
 cmd_arg_temp="-P -O"
 cmd_arg_brightness="-b"
-cmd_arg_reset="-x -v"
 color_array=(6500 5500 4200 3400 2700 2300 1900 1200)
 min_temp=1000
 max_temp=25000
