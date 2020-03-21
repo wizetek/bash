@@ -40,22 +40,26 @@ examples:
 ENDHELP
 }
 
-_COLORS=(6500 5500 4200 3400 2700 2300 1900 1200)
-_BRIGHTNESS=1.0
-_MAXTEMP=${_COLORS[0]}
-_MINTEMP=${_COLORS[-1]}
-_TEMPFILE="/tmp/$(basename ${0})-${UID}"
+cmd_path="/usr/bin/redshift"
+cmd_arg_temp="-P -O"
+cmd_arg_brightness="-b"
+cmd_arg_reset="-x -v"
+temp_file="/tmp/$(basename ${0})-${UID}"
+color_array=(6500 5500 4200 3400 2700 2300 1900 1200)
+max_temp=${color_array[0]}
+min_temp=${color_array[-1]}
+set_brightness=1.0
 
-if [[ -f ${_TEMPFILE} ]]
+if [[ -f ${temp_file} ]]
 then
-  read -r _TEMP < ${_TEMPFILE}
+  read -r set_temp < ${temp_file}
 else
-  _TEMP=${_MAXTEMP}
+  set_temp=${max_temp}
 fi
 
-if [[ ${2} != "" ]]
+if [[ -n ${2} ]]
 then
-  _BRIGHTNESS=${2}
+  set_brightness=${2}
 fi
 
 case ${1} in
@@ -64,43 +68,43 @@ case ${1} in
   exit 0
   ;;
 "-")
-  if [[ ${_TEMP} -gt ${_MINTEMP} ]]
+  if [[ ${set_temp} -gt ${min_temp} ]]
   then
-    ((_TEMP-=100))
+    ((set_temp-=100))
   fi
   ;;
 "+")
-  if [[ ${_TEMP} -lt ${_MAXTEMP} ]]
+  if [[ ${set_temp} -lt ${max_temp} ]]
   then
-    ((_TEMP+=100))
+    ((set_temp+=100))
   fi
   ;;
 "=")
-  redshift -x -v
+  ${cmd_path} ${cmd_arg_reset}
   exit 0
   ;;
 [0-9]*)
-  _TEMP=${1}
+  set_temp=${1}
   ;;
 *)
-  for T in ${_COLORS[@]}
+  for array_item in ${color_array[@]}
   do
-    if [[ ${T} -lt ${_TEMP} ]]
+    if [[ ${array_item} -lt ${set_temp} ]]
     then
       break
-    # _TEMP=1200, T=6500
-    elif [[ ${_TEMP} -eq ${_MINTEMP} ]]
+    # set_temp=1200, array_item=6500
+    elif [[ ${set_temp} -eq ${min_temp} ]]
     then
       break
     fi
   done
-  # set _TEMP from array
-  _TEMP=${T}
+  # set set_temp from array
+  set_temp=${array_item}
   ;;
 esac
 
-echo "color_temp=${_TEMP}, brightness=${_BRIGHTNESS}"
-redshift -P -O ${_TEMP} -b ${_BRIGHTNESS}
-echo ${_TEMP} > ${_TEMPFILE}
+echo "color_temp=${set_temp}, brightness=${set_brightness}"
+${cmd_path} ${cmd_arg_temp} ${set_temp} ${cmd_arg_brightness} ${set_brightness}
+echo ${set_temp} > ${temp_file}
 
 # eof
