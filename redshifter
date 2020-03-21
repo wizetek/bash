@@ -2,12 +2,21 @@
 #
 # redshifter
 #
+# 2020-03-20, 2018-03-13 Tom Wizetek
+# GPL
+#
 # Wrapper for 'redshift' http://jonls.dk/redshift/
 # Requires 'bc' for floating point math.
-# Optionally bind actions to DM/WM keyboard shortcuts.
 #
-# 2018-03-13, 2020-03-20 Tom Wizetek
-# GPL
+# Example key bindings in DM/WM:
+#
+# Super+\	redshifter
+# Super+]	redshifter +
+# Super+[	redshifter -
+# Super+/	redshifter / /
+# Super+.	redshifter = +
+# Super+,	redshifter = -
+#
 
 showHelp() {
 echo << ENDHELP "
