@@ -8,7 +8,7 @@
 # Wrapper for 'redshift' http://jonls.dk/redshift/
 # Requires 'bc' for floating point math.
 #
-# Example key bindings in DM/WM:
+# Example key bindings in DE/WM:
 #
 # Super+\	redshifter
 # Super+]	redshifter +
