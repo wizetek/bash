@@ -39,8 +39,8 @@ cycle through presets:
   1000-25000	set specific color temperature
 
 [brightness]
-  -		decrease brightness by 0.2
-  +		increase brightness by 0.2
+  -		decrease brightness by 0.02
+  +		increase brightness by 0.02
   /		reset to default
   0.1-1.0	set specific brightness value
 
