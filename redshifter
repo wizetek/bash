@@ -19,7 +19,8 @@
 #
 
 showHelp() {
-echo << ENDHELP "
+cat <<ENDHELP
+
   $(basename ${0}) [color] [brightness]
 
 cycle through presets:
@@ -44,8 +45,6 @@ cycle through presets:
   /		reset to default
   0.1-1.0	set specific brightness value
 
--h, --help	show this message
-"
 ENDHELP
 }
 
@@ -140,14 +139,8 @@ case ${1} in
   done
   set_temp=${array_item}
   ;;
-"-h"|"--help")
-  showHelp
-  exit 0
-  ;;
 *)
-  echo
-  echo "  $(basename ${0}) -h		for help"
-  echo
+  showHelp
   exit 1
   ;;
 esac
