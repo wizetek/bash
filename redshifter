@@ -19,7 +19,7 @@
 #
 
 showHelp() {
-cat <<ENDHELP
+  cat <<ENDHELP
 
   $(basename ${0}) [color] [brightness]
 
