@@ -23,7 +23,7 @@ showHelp() {
 
   $(basename ${0}) [color] [brightness]
 
-cycle through presets:
+no argument = cycle through presets:
 		6500K = Daylight
 		5500K = Sunlight
 		4200K = Fluorescent
@@ -32,18 +32,20 @@ cycle through presets:
 		2300K = Dim Incandescent
 		1900K = Candle
 		1200K = Ember
+
 [color]
+  r|restore	restore last saved values (e.g. for startup scripts)
   -		decrease color temperature by 100K
   +		increase color temperature by 100K
+  1000-25000	set specific color temperature
   =		keep current value / no-op
   /		reset to default
-  1000-25000	set specific color temperature
 
 [brightness]
   -		decrease brightness by 0.02
   +		increase brightness by 0.02
-  /		reset to default
   0.1-1.0	set specific brightness value
+  /		reset to default
 
 ENDHELP
 }
@@ -92,11 +94,11 @@ case ${2} in
     set_brightness=$(bc <<< ${set_brightness}+.02)
   fi
   ;;
-"/")
-  set_brightness=${max_brightness}
-  ;;
 [0-9]*)
   set_brightness=${2}
+  ;;
+"/")
+  set_brightness=${max_brightness}
   ;;
 esac
 
@@ -104,8 +106,8 @@ esac
 # Color temperature
 #
 case ${1} in
-"=")
-  : # no-op
+"r"|"restore")
+  ${cmd_path} ${cmd_arg_temp} ${temp_fle} ${cmd_arg_brightness} ${brightness_file}
   ;;
 "-")
   if [[ ${set_temp} -gt ${min_temp} ]]
@@ -119,11 +121,14 @@ case ${1} in
     ((set_temp+=100))
   fi
   ;;
+[0-9]*)
+  set_temp=${1}
+  ;;
 "/")
   set_temp=${color_array[0]}
   ;;
-[0-9]*)
-  set_temp=${1}
+"=")
+  : # no-op
   ;;
 "")
   for array_item in ${color_array[@]}
