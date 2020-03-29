@@ -21,7 +21,7 @@
 showHelp() {
   cat <<ENDHELP
 
-  $(basename ${0}) [color] [brightness]
+  $(basename ${0}) [colortemp] [brightness]
 
 no argument = cycle through presets:
 		6500K = Daylight
@@ -33,7 +33,7 @@ no argument = cycle through presets:
 		1900K = Candle
 		1200K = Ember
 
-[color]
+[colortemp]
   r|restore	restore last saved values (e.g. for startup scripts)
   -		decrease color temperature by 100K
   +		increase color temperature by 100K
@@ -53,28 +53,26 @@ ENDHELP
 #
 # Variables
 #
+conf_file="${HOME}/.$(basename ${0})"
 cmd_path="/usr/bin/redshift"
-cmd_arg_temp="-P -O"
+cmd_arg_colortemp="-P -O"
 cmd_arg_brightness="-b"
-color_array=(6500 5500 4200 3400 2700 2300 1900 1200)
-min_temp=1000
-max_temp=25000
+colortemp_array=(6500 5500 4200 3400 2700 2300 1900 1200)
+min_colortemp=1000
+max_colortemp=25000
 min_brightness=0.1
 max_brightness=1.0
-temp_file="${HOME}/.$(basename ${0})"
-brightness_file="${HOME}/.$(basename ${0})_b"
 
-if [[ -f ${temp_file} ]]
+#
+# Conf file
+#
+if [[ -f ${conf_file} ]]
 then
-  read -r set_temp < ${temp_file}
+  source ${conf_file}
+  set_colortemp=${colortemp}
+  set_brightness=${brightness}
 else
-  set_temp=${max_temp}
-fi
-
-if [[ -f ${brightness_file} ]]
-then
-  read -r set_brightness < ${brightness_file}
-else
+  set_colortemp=${max_colortemp}
   set_brightness=${max_brightness}
 fi
 
@@ -107,42 +105,42 @@ esac
 #
 case ${1} in
 "r"|"restore")
-  ${cmd_path} ${cmd_arg_temp} ${temp_fle} ${cmd_arg_brightness} ${brightness_file}
+  ${cmd_path} ${cmd_arg_colortemp} ${temp_fle} ${cmd_arg_brightness} ${brightness_file}
   ;;
 "-")
-  if [[ ${set_temp} -gt ${min_temp} ]]
+  if [[ ${set_colortemp} -gt ${min_colortemp} ]]
   then
-    ((set_temp-=100))
+    ((set_colortemp-=100))
   fi
   ;;
 "+")
-  if [[ ${set_temp} -lt ${max_temp} ]]
+  if [[ ${set_colortemp} -lt ${max_colortemp} ]]
   then
-    ((set_temp+=100))
+    ((set_colortemp+=100))
   fi
   ;;
 [0-9]*)
-  set_temp=${1}
+  set_colortemp=${1}
   ;;
 "/")
-  set_temp=${color_array[0]}
+  set_colortemp=${colortemp_array[0]}
   ;;
 "=")
   : # no-op
   ;;
 "")
-  for array_item in ${color_array[@]}
+  for array_item in ${colortemp_array[@]}
   do
-    if [[ ${array_item} -lt ${set_temp} ]]
+    if [[ ${array_item} -lt ${set_colortemp} ]]
     then
       break
-    # set_temp=1200, array_item=6500
-    elif [[ ${set_temp} -eq ${color_array[-1]} ]]
+    # set_colortemp=1200, array_item=6500
+    elif [[ ${set_colortemp} -eq ${colortemp_array[-1]} ]]
     then
       break
     fi
   done
-  set_temp=${array_item}
+  set_colortemp=${array_item}
   ;;
 *)
   showHelp
@@ -153,13 +151,12 @@ esac
 #
 # Execute
 #
-${cmd_path} ${cmd_arg_temp} ${set_temp} ${cmd_arg_brightness} ${set_brightness}
-echo "color_temp=${set_temp}, brightness=${set_brightness}"
+${cmd_path} ${cmd_arg_colortemp} ${set_colortemp} ${cmd_arg_brightness} ${set_brightness}
 
 #
-# Save values
+# Save values to conf file
 #
-echo ${set_temp} > ${temp_file}
-echo ${set_brightness} > ${brightness_file}
+echo "colortemp=${set_colortemp}" > ${conf_file}
+echo "brightness=${set_brightness}" >> ${conf_file}
 
 # eof
