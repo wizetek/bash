@@ -61,8 +61,8 @@ min_temp=1000
 max_temp=25000
 min_brightness=0.1
 max_brightness=1.0
-temp_file="/tmp/$(basename ${0})-${UID}"
-brightness_file="/tmp/$(basename ${0})_b-${UID}"
+temp_file="${HOME}/.$(basename ${0})"
+brightness_file="${HOME}/.$(basename ${0})_b"
 
 if [[ -f ${temp_file} ]]
 then
