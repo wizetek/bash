@@ -8,6 +8,8 @@
 # Wrapper for 'redshift' http://jonls.dk/redshift/
 # Requires 'bc' for floating point math.
 #
+# Configuration saved in ~/.redshifter
+#
 # Example key bindings in DE/WM:
 #
 # Super+\	redshifter
@@ -34,11 +36,10 @@ no argument = cycle through presets:
 		1200K = Ember
 
 [colortemp]
-  r|restore	restore last saved values (e.g. for startup scripts)
   -		decrease color temperature by 100K
   +		increase color temperature by 100K
   1000-25000	set specific color temperature
-  =		keep current value / no-op
+  =		no change / restore saved values (e.g. for startup scripts)
   /		reset to default
 
 [brightness]
@@ -104,8 +105,8 @@ esac
 # Color temperature
 #
 case ${1} in
-"r"|"restore")
-  ${cmd_path} ${cmd_arg_colortemp} ${temp_fle} ${cmd_arg_brightness} ${brightness_file}
+"=")
+  : # no-op
   ;;
 "-")
   if [[ ${set_colortemp} -gt ${min_colortemp} ]]
@@ -124,9 +125,6 @@ case ${1} in
   ;;
 "/")
   set_colortemp=${colortemp_array[0]}
-  ;;
-"=")
-  : # no-op
   ;;
 "")
   for array_item in ${colortemp_array[@]}
