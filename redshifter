@@ -8,7 +8,7 @@
 # Wrapper for 'redshift' http://jonls.dk/redshift/
 # Requires 'bc' for floating point math.
 #
-# Configuration saved in ~/.redshifter
+# Configuration saved in ~/.config/redshifter
 #
 # Example key bindings in DE/WM:
 #
@@ -54,7 +54,7 @@ ENDHELP
 #
 # Variables
 #
-conf_file="${HOME}/.$(basename ${0})"
+conf_file="${HOME}/.config/$(basename ${0})"
 cmd_path="/usr/bin/redshift"
 cmd_arg_colortemp="-P -O"
 cmd_arg_brightness="-b"
