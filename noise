@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# 2021-05-24 Tom Wizetek <tom@wizetek.com>
+
+SAVED_PID="/tmp/$(basename ${0})-${UID}"
+
+##
+
+addPID() {
+  echo ${!} >> ${SAVED_PID}
+}
+
+clearPID() {
+  echo -n "" > ${SAVED_PID}
+}
+
+playNoise() {
+  SOX_ARGS="-q -V0 -G -n"
+
+  play ${SOX_ARGS} synth whitenoise vol -12dB &
+  addPID
+
+  play ${SOX_ARGS} synth pinknoise &
+  addPID
+
+  play ${SOX_ARGS} synth brownnoise &
+  addPID
+}
+
+main() {
+  if [[ -s ${SAVED_PID} ]]; then
+    while read pid; do kill ${sig} ${pid}; done < ${SAVED_PID}
+    clearPID
+    echo "$(basename ${0}) off"
+  else
+    playNoise
+    echo "$(basename ${0}) on"
+  fi
+}
+
+##
+
+touch ${SAVED_PID}
+
+case ${1} in
+
+-a|-q|-f|-k|*abort|*quit|*force|*kill)
+  sig="-9"
+  main
+;;
+
+*)
+  sig=""
+  main
+;;
+
+esac
