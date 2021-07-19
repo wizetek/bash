@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# toggleperixxled
+#
+# Toggle LED backlight on Perixx PERIBOARD-317 keyboard
+# 2021-07-16 Tom Wizetek <tom@wizetek.com>
+
+led_state=$(xset q | sed -n 's/.*LED mask: *//p')
+#led_state=$(xset q | awk '/LED mask/ {print $10}')
+#led_state=$(xset q | grep 'LED mask:' | cut -d " " -f 21-)
+
+case ${led_state} in
+
+0000*)
+  xset led on
+;;
+
+ffff*)
+  xset led off
+;;
+
+esac
+
+#/eof
