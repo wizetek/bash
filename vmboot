@@ -19,20 +19,20 @@ shift
 case ${EXT} in
 
 .raw)
-EXE="-drive file=${IMG},format=raw"
+DSK="-drive file=${IMG},format=raw"
 ;;
 
 .iso)
-EXE="-cdrom ${IMG}"
+DSK="-cdrom ${IMG}"
 ;;
 
 *)
-EXE="-hda ${IMG}"
+DSK="-hda ${IMG}"
 ;;
 
 esac
 
-echo ${CMD} ${EXE} ${@}
-eval ${CMD} ${EXE} ${@}
+echo ${CMD} ${DSK} ${@}
+eval ${CMD} ${DSK} ${@}
 
 #/eof
