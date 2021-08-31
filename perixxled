@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# toggleperixxled
+# perixxled
 #
 # Toggle LED backlight on Perixx PERIBOARD-317 keyboard
 # 2021-07-16 Tom Wizetek <tom@wizetek.com>
