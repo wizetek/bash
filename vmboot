@@ -6,7 +6,8 @@
 CPU="2"
 RAM="4G"
 MAC=$( printf "52:54:%02x:%02x:%02x:%02x" $(( ${RANDOM} & 0xff )) $(( ${RANDOM} & 0xff )) $(( ${RANDOM} & 0xff)) $(( ${RANDOM} & 0xff )) )
-NET="-nic user,model=virtio-net-pci,mac=${MAC}"
+#NET="-nic user,model=virtio-net-pci,mac=${MAC}"
+NET="-nic user,mac=${MAC}"
 #SND="-soundhw hda"
 SND="-device AC97"
 #OPT="-usbdevice tablet -no-quit -no-shutdown -action panic=pause -S"
