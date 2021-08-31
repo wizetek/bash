@@ -5,11 +5,13 @@
 
 CPU="2"
 RAM="4G"
+MAC=$( printf "52:54:%02x:%02x:%02x:%02x" $(( ${RANDOM} & 0xff )) $(( ${RANDOM} & 0xff )) $(( ${RANDOM} & 0xff)) $(( ${RANDOM} & 0xff )) )
+NET="-nic user,model=virtio-net-pci,mac=${MAC}"
 #SND="-soundhw hda"
 SND="-device AC97"
 #OPT="-usbdevice tablet -no-quit -no-shutdown -action panic=pause -S"
 OPT="-name $(basename ${1})"
-CMD="qemu-system-x86_64 -enable-kvm -cpu host -smp ${CPU} -m ${RAM} ${SND} ${OPT}"
+CMD="qemu-system-x86_64 -enable-kvm -cpu host -smp ${CPU} -m ${RAM} ${NET} ${SND} ${OPT}"
 
 IMG="${1}"
 EXT="${1:(-4)}"
