@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# QEMU VM launch script
+# 2021-08-30 Tom Wizetek <tom@wizetek.com>
+
+CPU="2"
+RAM="4G"
+#SND="-soundhw hda"
+SND="-device AC97"
+#OPT="-usbdevice tablet -no-quit -no-shutdown -action panic=pause -S"
+OPT="-name $(basename ${1})"
+CMD="qemu-system-x86_64 -enable-kvm -cpu host -smp ${CPU} -m ${RAM} ${SND} ${OPT}"
+
+IMG="${1}"
+EXT="${1:(-4)}"
+
+shift
+
+case ${EXT} in
+
+.raw)
+EXE="-drive file=${IMG},format=raw"
+;;
+
+.iso)
+EXE="-cdrom ${IMG}"
+;;
+
+*)
+EXE="-hda ${IMG}"
+;;
+
+esac
+
+echo ${CMD} ${EXE} ${@}
+eval ${CMD} ${EXE} ${@}
+
+#/eof
