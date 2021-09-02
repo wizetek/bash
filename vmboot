@@ -1,7 +1,47 @@
 #!/bin/bash
 #
-# QEMU VM launch script
-# 2021-08-30 Tom Wizetek <tom@wizetek.com>
+# QEMU VM launch wrapper
+# 2021/09/01 Tom Wizetek <tom@wizetek.com>
+
+case ${1} in
+-h|-help|--help|help|?|"")
+cat << ENDHELP
+
+  $(basename ${0}) diskimage.iso [-opt] [-opt] [...]
+
+(.iso .raw .qcow2 .vdi .vmdk ...)
+
+Some common options:
+  -boot d		a b (FDD 1/2), c d (HDD 1/2), d (CD), n (NIC)
+  -boot c,once=d
+  -nic user,hostfwd=tcp::5022-:22
+  -nic user,hostfwd=tcp::6001-:6000
+  -nic user,hostfwd=tcp::5555-:3389
+  -nic user,model=virtio-net-pci
+  -nic tap
+  -nic bridge
+  -nic,model=?		list supported NIC models
+  -soundhw ?		list supported sound cards
+  -device ?		list all available devices by type
+  -device usb-tablet	(prevents mouse from being grabbed)
+  -device VGA,edid=on,xres=1366,yres=768
+  -loadvm <tag>		load saved state from snapshot
+  -snapshot		don't write changes to disk image (can still 'commit all' in Monitor)
+  -S			start paused
+  -no-shutdown		don't exit on shutdown
+  -vnc :1		video output to VNC server display :1 (password set in Monitor)
+  -vnc :0,to=9,lossy=on	try :0, :1, :2, :3, ... until :9; use lossy JPEG compression
+  -display none		no video output to user (guest still has video)
+  -nographic		no GUI! command line only (output and Monitor in host console)
+  -monitor stdio	Monitor in host console
+  -monitor telnet:127.0.0.1:5023,server,nowait
+  -daemonize		detach process from stdio
+  -name			set name for window title and VNC
+
+ENDHELP
+exit 0
+;;
+esac
 
 CPU="2"
 RAM="4G"
@@ -10,31 +50,26 @@ NET="-nic mac=${MAC}"
 #SND="-soundhw hda"
 SND="-device AC97"
 #OPT="-usbdevice tablet -no-quit -no-shutdown -action panic=pause -S"
-OPT="-name $(basename ${1})"
 CMD="qemu-system-x86_64 -enable-kvm -cpu host -smp ${CPU} -m ${RAM} ${NET} ${SND} ${OPT}"
-
+NAM="$(basename -a ${1})"
 IMG="${1}"
 EXT="${1:(-4)}"
 
 shift
 
 case ${EXT} in
-
 .raw)
-DSK="-drive file=${IMG},format=raw"
+DSK="-drive format=raw,file="
 ;;
-
 .iso)
-DSK="-cdrom ${IMG}"
+DSK="-cdrom "
 ;;
-
 *)
-DSK="-hda ${IMG}"
+DSK="-hda "
 ;;
-
 esac
 
-echo ${CMD} ${DSK} ${@}
-eval ${CMD} ${DSK} ${@}
+echo ${CMD} ${DSK}\"${IMG}\" ${@}
+${CMD} ${DSK}"${IMG}" -name "${NAM}" ${@}
 
-#/eof
+##
