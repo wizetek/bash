@@ -1,18 +1,33 @@
 #!/bin/bash
 #
 # QEMU VM launch wrapper
-# 2021/09/01 Tom Wizetek <tom@wizetek.com>
+# 2021-09-02 Tom Wizetek <tom@wizetek.com>
 
 case ${1} in
+-raw)
+EXT=".raw"
+shift
+;;
+-cd)
+EXT=".iso"
+shift
+;;
 -h|-help|--help|help|?|"")
 cat << ENDHELP
 
-  $(basename ${0}) diskimage.iso [-opt] [-opt] [...]
+  $(basename ${0}) [-raw|-cd] diskimage.iso [-opt] [-opt] [...]
 
-(.iso .raw .qcow2 .vdi .vmdk ...)
+  First optional argument:
+  -raw		Force raw format for disk image
+  -cd		Force cdrom medium type for disk image
 
-Some common options:
-  -boot d		a b (FDD 1/2), c d (HDD 1/2), d (CD), n (NIC)
+  Based on file name extension, automatically use:
+  -cdrom	for .iso
+  -hda		for .qcow2 .vdi .vmdk .vhdx ...
+  -drive file=	for .raw
+
+  Some common [-opt]ions:
+  -boot d		a b (FDD1 FDD2), c d (HDD1 HDD2), d (CDROM), n (NIC)
   -boot c,once=d
   -nic user,hostfwd=tcp::5022-:22
   -nic user,hostfwd=tcp::6001-:6000
@@ -20,23 +35,23 @@ Some common options:
   -nic user,model=virtio-net-pci
   -nic tap
   -nic bridge
-  -nic,model=?		list supported NIC models
-  -soundhw ?		list supported sound cards
-  -device ?		list all available devices by type
-  -device usb-tablet	(prevents mouse from being grabbed)
+  -nic,model=?		List supported NIC models
+  -soundhw ?		List supported sound cards
+  -device ?		List all available devices by type
+  -device usb-tablet	(Prevents mouse grab)
   -device VGA,edid=on,xres=1366,yres=768
-  -loadvm <tag>		load saved state from snapshot
-  -snapshot		don't write changes to disk image (can still 'commit all' in Monitor)
-  -S			start paused
-  -no-shutdown		don't exit on shutdown
-  -vnc :1		video output to VNC server display :1 (password set in Monitor)
-  -vnc :0,to=9,lossy=on	try :0, :1, :2, :3, ... until :9; use lossy JPEG compression
-  -display none		no video output to user (guest still has video)
-  -nographic		no GUI! command line only (output and Monitor in host console)
+  -loadvm <tag>		Load saved state from snapshot
+  -snapshot		Don't write changes to disk image (can still 'commit all' in Monitor)
+  -S			Start paused
+  -no-shutdown		Don't exit on shutdown
+  -vnc :1		Video output to VNC server display :1 (password set in Monitor)
+  -vnc :0,to=9,lossy=on	Try :0, :1, :2, :3, ... until :9; use lossy JPEG compression
+  -display none		No video output to user (guest still has video)
+  -nographic		No GUI / command line only (output and Monitor in host console)
   -monitor stdio	Monitor in host console
   -monitor telnet:127.0.0.1:5023,server,nowait
-  -daemonize		detach process from stdio
-  -name			set name for window title and VNC
+  -daemonize		Detach process from stdio
+  -name			Set name for window title and VNC
 
 ENDHELP
 exit 0
@@ -53,7 +68,10 @@ SND="-device AC97"
 CMD="qemu-system-x86_64 -enable-kvm -cpu host -smp ${CPU} -m ${RAM} ${NET} ${SND} ${OPT}"
 NAM="$(basename -a ${1})"
 IMG="${1}"
+
+if [[ ${EXT} == "" ]]; then
 EXT="${1:(-4)}"
+fi
 
 shift
 
