@@ -41,7 +41,7 @@ cat << ENDSHORTHELP
 
 Basic usage:
 
-  $(basename ${0}) diskimage.iso
+  $(basename ${0}) diskimage.img
 
 QEMU options used automatically based on file extension:
   -cdrom	for .iso
@@ -57,7 +57,7 @@ exit 0
 --help|-help|help)
 cat << ENDLONGHELP
 
-  $(basename ${0}) [-|-raw|-cd] diskimage.iso [-opt] [-opt] [...]
+  $(basename ${0}) [-|-raw|-cd] diskimage.img [-opt] [-opt] [...]
 
 Optional first switch:
   -		Pass everything that follows directly to QEMU
