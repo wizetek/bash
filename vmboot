@@ -15,7 +15,6 @@ NIC="-nic mac=${MAC}"
 #SND="-soundhw hda"
 SND="-device AC97"
 NAM="$(basename -a ${1} 2>/dev/null)"
-IMG="${1}"
 
 # If first argument is a switch instead of file name, handle it
 case ${1} in
@@ -98,6 +97,8 @@ exit 0
 ;;
 
 esac
+
+IMG="${1}"
 
 # If not forcing disk type via first switch, get file extension .123 characters
 if [[ ${EXT} == "" ]]; then
