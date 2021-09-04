@@ -98,8 +98,6 @@ exit 0
 
 esac
 
-IMG="${1}"
-
 # If not forcing disk type via first switch, get file extension .123 characters
 if [[ ${EXT} == "" ]]; then
 EXT="${1:(-4)}"
@@ -149,6 +147,7 @@ DSK="-hda "
 
 esac
 
+IMG="${1}"
 shift
 echo ${CMD} ${OPT} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}\"${IMG}\"
 
