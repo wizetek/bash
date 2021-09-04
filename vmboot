@@ -14,7 +14,7 @@ MAC=$( printf "52:54:%02x:%02x:%02x:%02x" $(( ${RANDOM} & 0xff )) $(( ${RANDOM} 
 NIC="-nic mac=${MAC}"
 SND="-device AC97"
 #SND="-soundhw hda"
-NAM="$(basename -a ${1})"
+NAM="$(basename -a ${1} 2>/dev/null)"
 IMG="${1}"
 
 # If first argument is a switch instead of file name, handle it
