@@ -6,7 +6,7 @@
 # Set default QEMU options
 CMD="/usr/bin/qemu-system-x86_64"
 OPT="-enable-kvm -cpu host"
-#OPT="-enable-kvm -cpu host -usbdevice tablet -no-quit -no-shutdown -action panic=pause -S"
+#OPT="-enable-kvm -cpu host -action panic=pause"
 SMP="-smp 2"
 RAM="-m 4G"
 # Randomize MAC address
@@ -21,8 +21,7 @@ case ${1} in
 
 -)
 shift
-${CMD} ${@}
-exit
+exec ${CMD} ${@}
 ;;
 
 -raw)
@@ -81,6 +80,7 @@ Some common QEMU [-opt]ions:
   -snapshot		Don't write changes to disk image (can still 'commit all' in Monitor)
   -S			Start paused
   -no-shutdown		Don't exit on shutdown
+  -no-quit		Don't allow closing window
   -vnc :1		Video output to VNC server display :1 (password set in Monitor)
   -vnc :0,to=9,lossy=on	Try :0, :1, :2, :3, ... until :9; use lossy JPEG compression
   -display none		No video output to user (guest still has video)
@@ -103,7 +103,7 @@ if [[ ${EXT} == "" ]]; then
 EXT="${1:(-4)}"
 fi
 
-# Override default QEMU options with supplied switches
+# If any QEMU switches are supplied, override the corresponding default options
 for ARG in ${@}; do
 case $ARG in
 
@@ -119,6 +119,7 @@ RAM=""
 NIC=""
 ;;
 
+# Caveat: '-device' may not be a sound card
 -soundhw|-device)
 SND=""
 ;;
@@ -151,7 +152,7 @@ IMG="${1}"
 shift
 echo ${CMD} ${OPT} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}\"${IMG}\"
 
-# Execute based on whether '-name' was specified
+# Execute based on whether '-name' is specified
 if [[ ${NAM} == "" ]]; then
 ${CMD} ${OPT} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}"${IMG}"
 else
