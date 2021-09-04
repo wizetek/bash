@@ -120,11 +120,7 @@ RAM=""
 NIC=""
 ;;
 
--soundhw)
-SND=""
-;;
-
--device)
+-soundhw|-device)
 SND=""
 ;;
 
