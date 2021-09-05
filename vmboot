@@ -1,20 +1,38 @@
 #!/bin/bash
 
-# QEMU VM launch wrapper
+# vmboot: QEMU VM launch wrapper
+# config: ~/.config/vmbootrc
 # 2021-09-04 Tom Wizetek <tom@wizetek.com>
 
-# Set default QEMU options
+CFG="${HOME}/.config/$(basename ${0})rc"
+
+# Read config
+if [[ -r ${CFG} ]]; then
+source ${CFG}
+else
+
+# Generate config file
+cat > ${CFG} << ENDCFGFILE
+# ${CFG}
+
 CMD="/usr/bin/qemu-system-x86_64"
-OPT="-enable-kvm -cpu host"
+CPU="-enable-kvm -cpu host"
 #OPT="-enable-kvm -cpu host -action panic=pause"
 SMP="-smp 2"
 RAM="-m 4G"
-# Randomize MAC address
-MAC=$( printf "52:54:%02x:%02x:%02x:%02x" $(( ${RANDOM} & 0xff )) $(( ${RANDOM} & 0xff )) $(( ${RANDOM} & 0xff)) $(( ${RANDOM} & 0xff )) )
-NIC="-nic mac=${MAC}"
+# Static
+#MAC="52:54:00:01:02:03"
+# Random
+MAC=\$( printf "52:54:%02x:%02x:%02x:%02x" \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff)) \$(( \${RANDOM} & 
+0xff )) )
+NIC="-nic mac=\${MAC}"
 #SND="-soundhw hda"
 SND="-device AC97"
-NAM="$(basename -a ${1} 2>/dev/null)"
+ENDCFGFILE
+
+echo "Created ${CFG}"
+exec ${0}
+fi
 
 # If first argument is a switch instead of file name, handle it
 case ${1} in
@@ -149,14 +167,15 @@ DSK="-hda "
 esac
 
 IMG="${1}"
+NAM="$(basename -a ${1} 2>/dev/null)"
 shift
-echo ${CMD} ${OPT} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}\"${IMG}\"
+echo ${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}\"${IMG}\"
 
 # Execute based on whether '-name' is specified
 if [[ ${NAM} == "" ]]; then
-${CMD} ${OPT} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}"${IMG}"
+${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}"${IMG}"
 else
-${CMD} ${OPT} ${SMP} ${RAM} ${NIC} ${SND} ${@} -name "${NAM}" ${DSK}"${IMG}"
+${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${@} -name "${NAM}" ${DSK}"${IMG}"
 fi
 
 ##
