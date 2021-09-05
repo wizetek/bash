@@ -39,7 +39,7 @@ SND="-device AC97"
 ENDCFGFILE
 
 echo "Created ${CFG}"
-exec ${0}
+exec ${0} ${@}
 
 else
 echo "Failed to access ${CFG}"
