@@ -1,30 +1,31 @@
 #!/bin/bash
 
 # vmboot - QEMU VM launch wrapper
-# config: ~/.config/vmbootrc
+# configuration in ~/.config/vmbootrc
 # 2021-09-05 Tom Wizetek <tom@wizetek.com>
 
 CFG="${HOME}/.config/$(basename ${0})rc"
 
-# Read config file
-if [[ -r ${CFG} ]]; then
+# Try to read config file
+if [[ -f ${CFG} && -r ${CFG} ]]; then
 source ${CFG}
 
-# Check if basic options are set in config file
+# If basic options are missing in config file, warn and set defaults
 if [[ ${CMD} == "" ]]; then
-echo "Missing options in ${CFG}"
-exit 1
+echo "Missing options in ${CFG}. Using defaults."
+CMD="qemu-system-x86_64"
 fi
 
 # If config file is not found, generate it
-elif [[ ! -f ${CFG} ]]; then
+elif [[ ! -e ${CFG} ]]; then
 cat > ${CFG} << ENDCFGFILE
 # ${CFG}
 #
 # $(basename ${0}) configuration file
 #
-# CMD must be set
-# CPU, SMP, RAM, NIC, SND, OPT are optional
+# CMD points to QEMU binary
+# CPU is recommended for best performance
+# SMP, RAM, NIC, SND, OPT are optional
 
 CMD="qemu-system-x86_64"
 CPU="-enable-kvm -cpu host"
@@ -41,11 +42,13 @@ ENDCFGFILE
 echo "Created ${CFG}"
 exec ${0} ${@}
 
-# Run without config file
+# If unable to use config file, warn and set some default options
 else
-echo "Failed to access ${CFG}"
+echo "Failed to access ${CFG}. Using default options."
 CMD="qemu-system-x86_64"
 CPU="-enable-kvm -cpu host"
+SMP="-smp 2"
+RAM="-m 4G"
 fi
 
 # If first argument is a switch instead of file name, handle it
@@ -163,7 +166,7 @@ NAM=""
 esac
 done
 
-# Recognize .raw and .iso simply by name
+# Identify .raw and .iso simply by file extension and force disk type
 case ${EXT} in
 
 .raw)
