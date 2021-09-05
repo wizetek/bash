@@ -26,7 +26,7 @@ cat > ${CFG} << ENDCFGFILE
 # CMD must be set
 # CPU, SMP, RAM, NIC, SND, OPT are optional
 
-CMD="/usr/bin/qemu-system-x86_64"
+CMD="qemu-system-x86_64"
 CPU="-enable-kvm -cpu host"
 SMP="-smp 2"
 RAM="-m 4G"
@@ -41,9 +41,11 @@ ENDCFGFILE
 echo "Created ${CFG}"
 exec ${0} ${@}
 
+# Run without config file
 else
 echo "Failed to access ${CFG}"
-exit 1
+CMD="qemu-system-x86_64"
+CPU="-enable-kvm -cpu host"
 fi
 
 # If first argument is a switch instead of file name, handle it
