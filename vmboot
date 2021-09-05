@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# vmboot: QEMU VM launch wrapper
+# vmboot - QEMU VM launch wrapper
 # config: ~/.config/vmbootrc
 # 2021-09-04 Tom Wizetek <tom@wizetek.com>
 
@@ -10,23 +10,27 @@ CFG="${HOME}/.config/$(basename ${0})rc"
 if [[ -r ${CFG} ]]; then
 source ${CFG}
 
+# Check if basic options are set in config file
+if [[ ${CMD} == "" ]]; then
+echo "Missing options in ${CFG}"
+exit 1
+fi
+
 # If config file is not found, generate it
 elif [[ ! -f ${CFG} ]]; then
 cat > ${CFG} << ENDCFGFILE
 # ${CFG}
 # $(basename ${0}) configuration file
+# CMD must be set!
 
 CMD="/usr/bin/qemu-system-x86_64"
 CPU="-enable-kvm -cpu host"
-#OPT="-enable-kvm -cpu host -action panic=pause"
+#CPU="-enable-kvm -cpu host -action panic=pause"
 SMP="-smp 2"
 RAM="-m 4G"
-# Static
-#MAC="52:54:00:01:02:03"
-# Random
-MAC=\$( printf "52:54:%02x:%02x:%02x:%02x" \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff)) \$(( \${RANDOM} & 
-0xff )) )
-NIC="-nic mac=\${MAC}"
+#NIC="-nic mac=52:54:00:01:02:03"
+# Random MAC address
+NIC="-nic mac=\$( printf 52:54:%02x:%02x:%02x:%02x \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff)) \$(( \${RANDOM} & 0xff )) )"
 #SND="-soundhw hda"
 SND="-device AC97"
 ENDCFGFILE
@@ -35,7 +39,7 @@ echo "Created ${CFG}"
 exec ${0}
 
 else
-echo "Failed to create ${CFG}"
+echo "Failed to access ${CFG}"
 exit 1
 fi
 
