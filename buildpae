@@ -1,0 +1,249 @@
+#!/bin/bash
+
+#
+# buildpae
+#
+# 2010-2014 Tom Wizetek
+# http://www.wizetek.com/
+# https://pae.archlinux.ca/
+#
+# - modifies the stock kernel PKGBUILD and config files from ABS
+# - builds binary packages and signs with PGP key
+# - creates source package for AUR
+#
+# syntax: buildpae [-c|-t]
+#
+# -c, --core
+# -t, --testing
+#
+# update 25: 2014-06-09 v3.14.6 further AUR split package improvements: global pkgdesc and strip vim:set
+# update 24: 2014-06-01 v3.14.5 AUR 3.0.0 now supports split packages, use mkaurball to include .AURINFO
+# update 23: 2014-05-13 v3.14.3 use sha256sums instead of md5
+# update 22: 2013-12-07 v3.12.3 new SMP config options and other excluded stuff (NUMA)
+# update 21: 2013-11-17 v3.12 more XEN config options (TCG_XEN)
+# update 20: 2013-10-02 v3.11.2 enable XEN (requires PAE) and accompanying modules in config, prompt before package signing
+# update 19: 2013-07-29 v3.10.3 handle new kernel modules + XEN config fix
+# update 18: 2013-06-16 v3.5.3 split install step and moved as last
+# update 17: 2012-09-23 v3.5.2 path /tmp/builds to take advantage of tmpfs
+# update 16: 2012-08-11 v3.5.1 followed upstream changes to PKGBUILD
+# update 15: 2012-07-28 v3.4.6 added package signing
+# update 14: 2011-11-10 v3.1 adjustments for updated kernel PKGBUILD (new patches - MD5, LEDS_ALIX2 in config)
+# update 13: 2011-08-17 v3.0.2 fixed modifying pkgbase and appending pkgdesc
+# update 12: 2011-08-08 v3.0.1 updated for kernel 3.0
+# update 11: 2011-05-15 delete groups=('base'); ESC key = quit when prompted
+# update 10: 2011-04-12 small bugfix when passing command line arguments
+# update 9:  2011-03-26 new resync action, new automated build process via command arguments
+# update 8:  2010-12-11
+# update 7:  2010-11-28
+# update 6:  2010-11-26
+# update 5:  2010-09-30
+# update 4:  2010-06-03
+# update 3:  2010-03-28
+# update 2:  2010-03-21
+# update 1:  2010-02-10
+# original:  2010-01-30
+#
+
+# where to build packages
+#########################
+_BUILDPATH="$HOME/builds"
+#########################
+
+# automated build process
+case $1 in
+  -c|--core) _syncabs=c && _repo=core && _splitpkg=b && _buildnow=y ;;
+  -t|--testing) _syncabs=t && _repo=testing && _splitpkg=b && _buildnow=y ;;
+  '') ;;
+  *) echo "Unrecognized option: $1" ;;
+esac
+
+kernelver()
+{
+  _kverinst=$(pacman -Q linux 2>/dev/null | awk '{print $2}')
+  _kverpae=$(pacman -Q linux-pae 2>/dev/null | awk '{print $2}')
+  _pbcore=/var/abs/core/linux/PKGBUILD
+  _pbtesting=/var/abs/testing/linux/PKGBUILD
+  _kvercore=$(grep 'pkgver=' ${_pbcore} 2>/dev/null | cut -d'=' -f2)
+  _kvercore=${_kvercore}-$(grep 'pkgrel=' ${_pbcore} 2>/dev/null | cut -d'=' -f2)
+  _kvertesting=$(grep 'pkgver=' ${_pbtesting} 2>/dev/null | cut -d'=' -f2)
+  _kvertesting=${_kvertesting}-$(grep 'pkgrel=' ${_pbtesting} 2>/dev/null | cut -d'=' -f2)
+  echo -e "\nKernel version info:\n\ninstalled stock ARCH\t${_kverinst}\ninstalled PAE\t\t${_kverpae}\navailable ABS core\t${_kvercore}\navailable ABS testing\t${_kvertesting}\n"
+}
+
+kernelver
+
+syncabs()
+{
+  if ! [[ ${_syncabs} ]]
+  then
+    echo -en "Sync package 'linux' from ABS repo: [c]ore, [t]esting or [B]oth?  [s]kip, [q]uit =>"
+    read -n 1 _syncabs
+    [[ ${_syncabs} ]] && echo
+  fi
+  case ${_syncabs} in
+    c|C) abs core/linux || sudo abs core/linux && kernelver ;;
+    t|T) abs testing/linux || sudo abs testing/linux && kernelver ;;
+    b|B|'') _syncabs=b ; abs core/linux && abs testing/linux || sudo abs core/linux && sudo abs testing/linux && kernelver ;;
+    s|S) unset _syncabs ; echo ;;
+    q|Q|.) echo -e "\nQuit!\n" ; exit 1 ;;
+    *) unset _syncabs ; syncabs ;;
+  esac
+}
+
+syncabs
+
+absrepo()
+{
+  echo -en "Use ABS repo: [C]ore or [t]esting?  [r]esync, [q]uit =>"
+  read -n 1 _absrepo
+  [[ ${_absrepo} ]] && echo
+  case ${_absrepo} in
+    c|C|'') _repo='core' ;;
+    t|T) _repo='testing' ;;
+    r|R) echo ; syncabs ; absrepo ;;
+    q|Q|.) echo -e "\nQuit!\n" ; exit 1 ;;
+    *) absrepo ;;
+  esac
+}
+
+[[ ${_repo} ]] || absrepo
+
+_PKGBUILD=/var/abs/${_repo}/linux/PKGBUILD
+[[ ! -e ${_PKGBUILD} ]] && echo -e "\nCould not find ${_PKGBUILD}\nSync ABS later again before building packages.\n" && exit 1
+
+pkgver=$(sed -n 's/^pkgver=//p' ${_PKGBUILD})
+pkgrel=$(sed -n 's/^pkgrel=//p' ${_PKGBUILD})
+_path=${_BUILDPATH}/linux-pae-${_basekernel}${pkgver}-${pkgrel}
+echo -e "\nBuild directory: ${_path}\n"
+mkdir -p ${_path}
+cd ${_path}
+cp /var/abs/${_repo}/linux/* .
+cp PKGBUILD PKGBUILD.orig
+cp config config.orig
+cp linux.preset linux-pae.preset
+cp linux.install linux-pae.install
+
+#
+# config
+#
+# PAE
+sed -i 's/CONFIG_HIGHMEM4G=y/# CONFIG_HIGHMEM4G is not set/' config
+sed -i 's/# CONFIG_HIGHMEM64G is not set/CONFIG_HIGHMEM64G=y/' config
+# SMP
+sed -i 's/# CONFIG_X86_BIGSMP is not set/CONFIG_X86_BIGSMP=y/' config
+sed -i '/^CONFIG_NR_CPUS=/ s/8/64/' config
+# XEN, etc.
+sed -i '$a\
+\
+# Tom Wizetek: other settings not included in stock Arch Linux x86 config\
+CONFIG_XEN=y\
+# CONFIG_XEN_DEBUG_FS is not set\
+CONFIG_XEN_PCIDEV_FRONTEND=y\
+CONFIG_XEN_BLKDEV_FRONTEND=y\
+# CONFIG_XEN_BLKDEV_BACKEND is not set\
+CONFIG_XEN_NETDEV_FRONTEND=y\
+# CONFIG_XEN_NETDEV_BACKEND is not set\
+CONFIG_HVC_XEN=y\
+CONFIG_HVC_XEN_FRONTEND=y\
+# CONFIG_XEN_WDT is not set\
+CONFIG_XEN_FBDEV_FRONTEND=y\
+CONFIG_XEN_BALLOON=y\
+# CONFIG_XEN_SELFBALLOONING is not set\
+CONFIG_XEN_SCRUB_PAGES=y\
+CONFIG_XEN_DEV_EVTCHN=y\
+CONFIG_XEN_BACKEND=y\
+CONFIG_XENFS=y\
+CONFIG_XEN_COMPAT_XENFS=y\
+CONFIG_XEN_SYS_HYPERVISOR=y\
+CONFIG_XEN_GNTDEV=m\
+CONFIG_XEN_GRANT_DEV_ALLOC=m\
+CONFIG_XEN_PCIDEV_BACKEND=m\
+CONFIG_XEN_ACPI_PROCESSOR=m\
+# CONFIG_TCG_XEN is not set\
+# CONFIG_NUMA_BALANCING is not set\
+CONFIG_NUMA=y\
+# CONFIG_NUMA_EMU is not set\
+CONFIG_NODES_SHIFT=3\
+# CONFIG_DISCONTIGMEM_MANUAL is not set\
+# CONFIG_ACPI_NUMA is not set\
+# CONFIG_SENSORS_NTC_THERMISTOR is not set\
+CONFIG_I2O_EXT_ADAPTEC_DMA64=y' config
+
+#
+# PKGBUILD
+#
+sed -i '2i# Maintainer: Tom Wizetek <tom@wizetek.com>' PKGBUILD
+sed -i '/^pkgbase=/d' PKGBUILD
+#sed -i '/#pkgbase=/ s/#//; s/custom/pae/' PKGBUILD
+sed -i '/#pkgbase=/ c\pkgbase=linux-pae' PKGBUILD
+sed -i "/^arch=/ s/ 'x86_64'//" PKGBUILD
+sed -i "s/ 'config.x86_64'$//" PKGBUILD
+sed -i 's/and modules/& with PAE support (HIGHMEM64G)/' PKGBUILD
+#sed -i "/groups=('base')/d" PKGBUILD
+#sed -i '$a\
+## workaround for uploading split packages to AUR\
+#pkgname=linux-pae\
+#pkgdesc="The ${pkgbase} kernel and modules with PAE support (HIGHMEM64G)"\
+#' PKGBUILD
+sed -i '$a\
+# set description for split packages in AUR\
+pkgdesc="Linux PAE (HIGHMEM64) kernel and modules"\
+' PKGBUILD
+
+#
+# checksums
+#
+sed -i '/sha256sums=(/,/)/d' PKGBUILD
+makepkg -g >> PKGBUILD
+echo >> PKGBUILD
+#sed -i '/# vim:set/ {H;d}; ${x}' PKGBUILD
+sed -i '/# vim:set/d' PKGBUILD
+
+echo -e "\nPKGBUILD modifications completed.\n"
+
+#
+# src pkg
+#
+#makepkg --source --force
+mkaurball -f
+echo
+
+#
+# bin pkg
+#
+buildnow()
+{
+  echo -en "Build packages now? [Y|n|q] =>"
+  read -n 1 _buildnow
+  [[ ${_buildnow} ]] && echo
+  case ${_buildnow} in
+    y|Y|'') ;;
+    n|N|q|Q|.) echo -e "\nTo build packages later using current configuration, run 'makepkg' in the build directory.\n" ; exit 1 ;;
+    *) buildnow ;;
+  esac
+}
+
+[[ ${_buildnow} ]] || buildnow
+
+#makepkg --syncdeps --sign --log || makepkg --sign -sRfL || (rm -r ${_path}/{src,pkg} && makepkg --sign -sL)
+makepkg --syncdeps --log
+
+#
+# sign
+#
+echo -en "\nBuild is done.\nIf everything looks OK, press any key to sign packages now..."
+read -n 1 _signnow
+
+makepkg --repackage --force --sign
+
+#
+# repo db & sign
+#
+repo-add --verify --sign linux-pae.db.tar.gz *.pkg.tar.xz
+
+#
+# install
+#
+makepkg --install
+
+#eof
