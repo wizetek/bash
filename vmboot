@@ -20,12 +20,14 @@ fi
 elif [[ ! -f ${CFG} ]]; then
 cat > ${CFG} << ENDCFGFILE
 # ${CFG}
+#
 # $(basename ${0}) configuration file
-# CMD must be set!
+#
+# CMD must be set
+# CPU, SMP, RAM, NIC, SND, OPT are optional
 
 CMD="/usr/bin/qemu-system-x86_64"
 CPU="-enable-kvm -cpu host"
-#CPU="-enable-kvm -cpu host -action panic=pause"
 SMP="-smp 2"
 RAM="-m 4G"
 #NIC="-nic mac=52:54:00:01:02:03"
@@ -33,6 +35,7 @@ RAM="-m 4G"
 NIC="-nic mac=\$( printf 52:54:%02x:%02x:%02x:%02x \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff)) \$(( \${RANDOM} & 0xff )) )"
 #SND="-soundhw hda"
 SND="-device AC97"
+#OPT="-action panic=pause"
 ENDCFGFILE
 
 echo "Created ${CFG}"
@@ -130,7 +133,7 @@ if [[ ${EXT} == "" ]]; then
 EXT="${1:(-4)}"
 fi
 
-# If any QEMU switches are supplied, override the corresponding default options
+# If any QEMU switches are supplied, override the corresponding config file options
 for ARG in ${@}; do
 case $ARG in
 
@@ -178,13 +181,13 @@ esac
 IMG="${1}"
 NAM="$(basename -a ${1} 2>/dev/null)"
 shift
-echo ${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}\"${IMG}\"
+echo ${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${OPT} ${@} ${DSK}\"${IMG}\"
 
 # Execute based on whether '-name' is specified
 if [[ ${NAM} == "" ]]; then
-${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${@} ${DSK}"${IMG}"
+${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${OPT} ${@} ${DSK}"${IMG}"
 else
-${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${@} -name "${NAM}" ${DSK}"${IMG}"
+${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${OPT} ${@} -name "${NAM}" ${DSK}"${IMG}"
 fi
 
 ##
