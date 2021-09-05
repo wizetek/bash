@@ -2,7 +2,7 @@
 
 # vmboot - QEMU VM launch wrapper
 # config: ~/.config/vmbootrc
-# 2021-09-04 Tom Wizetek <tom@wizetek.com>
+# 2021-09-05 Tom Wizetek <tom@wizetek.com>
 
 CFG="${HOME}/.config/$(basename ${0})rc"
 
