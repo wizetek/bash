@@ -6,14 +6,15 @@
 
 CFG="${HOME}/.config/$(basename ${0})rc"
 
-# Read config
+# Read config file
 if [[ -r ${CFG} ]]; then
 source ${CFG}
-else
 
-# Generate config file
+# If config file is not found, generate it
+elif [[ ! -f ${CFG} ]]; then
 cat > ${CFG} << ENDCFGFILE
 # ${CFG}
+# $(basename ${0}) configuration file
 
 CMD="/usr/bin/qemu-system-x86_64"
 CPU="-enable-kvm -cpu host"
@@ -32,6 +33,10 @@ ENDCFGFILE
 
 echo "Created ${CFG}"
 exec ${0}
+
+else
+echo "Failed to create ${CFG}"
+exit 1
 fi
 
 # If first argument is a switch instead of file name, handle it
