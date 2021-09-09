@@ -2,7 +2,7 @@
 
 # vmboot - QEMU VM launch wrapper
 # configuration in ~/.config/vmbootrc
-# 2021-09-05 Tom Wizetek <tom@wizetek.com>
+# 2021-09-09 Tom Wizetek <tom@wizetek.com>
 
 CFG="${HOME}/.config/$(basename ${0})rc"
 
@@ -10,9 +10,9 @@ CFG="${HOME}/.config/$(basename ${0})rc"
 if [[ -f ${CFG} && -r ${CFG} ]]; then
 source ${CFG}
 
-# If basic options are missing in config file, warn and set defaults
+# If QEMU command is missing in config file, warn and use QEMU defaults
 if [[ ${CMD} == "" ]]; then
-echo "Missing options in ${CFG}. Using defaults."
+echo "Missing options in ${CFG}. Using QEMU defaults."
 CMD="qemu-system-x86_64"
 fi
 
@@ -28,25 +28,28 @@ cat > ${CFG} << ENDCFGFILE
 # SMP, RAM, NIC, SND, OPT are optional
 
 CMD="qemu-system-x86_64"
-CPU="-enable-kvm -cpu host"
+CPU="-accel kvm -cpu host"
+# Newer Q35 PCIe instead of i440FX PCI host bridge
+#CPU="-machine q35,accel=kvm -cpu host"
 SMP="-smp 2"
 RAM="-m 4G"
-#NIC="-nic mac=52:54:00:01:02:03"
+#NIC="-nic mac=52:54:01:23:45:67"
 # Random MAC address
 NIC="-nic mac=\$( printf 52:54:%02x:%02x:%02x:%02x \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff )) \$(( \${RANDOM} & 0xff)) \$(( \${RANDOM} & 0xff )) )"
 #SND="-soundhw hda"
 SND="-device AC97"
-#OPT="-action panic=pause"
+#OPT="-monitor unix:/tmp/qemu-monitor,server,nowait -action panic=pause"
 ENDCFGFILE
 
 echo "Created ${CFG}"
+# Re-run the script with all supplied arguments
 exec ${0} ${@}
 
-# If unable to use config file, warn and set some default options
+# If unable to use config file, warn and set some basic QEMU options
 else
 echo "Failed to access ${CFG}. Using default options."
 CMD="qemu-system-x86_64"
-CPU="-enable-kvm -cpu host"
+CPU="-accel kvm -cpu host"
 SMP="-smp 2"
 RAM="-m 4G"
 fi
@@ -100,13 +103,14 @@ Optional first switch:
 Some common QEMU [-opt]ions:
   -boot d		a b (FDD1 FDD2), c d (HDD1 HDD2), d (CDROM), n (NIC)
   -boot c,once=d
+  -nic mac=52:54:01:23:45:67
+  -nic bridge		(Must be configured on host)
+  -nic none		No network
   -nic hostfwd=tcp::5022-:22
   -nic hostfwd=tcp::6001-:6000
   -nic hostfwd=tcp::5555-:3389
-  -nic bridge,mac=52:54:00:12:34:56
   -nic model=virtio-net-pci
-  -nic none		No network
-  -nic,model=?		List supported NIC models
+  -nic model=?		List supported NIC models
   -soundhw ?		List supported sound cards
   -device ?		List all available devices by type
   -device usb-tablet	(Prevents mouse grab)
@@ -116,14 +120,16 @@ Some common QEMU [-opt]ions:
   -S			Start paused
   -no-shutdown		Don't exit on shutdown
   -no-quit		Don't allow closing window
+  -full-screen
+  -name			Title for QEMU window and VNC window
   -vnc :1		Video output to VNC server display :1 (password set in Monitor)
   -vnc :0,to=9,lossy=on	Try :0, :1, :2, :3, ... until :9; use lossy JPEG compression
   -display none		No video output to user (guest still has video)
   -nographic		No GUI / command line only (output and Monitor in host console)
   -monitor stdio	Monitor in host console
+  -monitor unix:/tmp/qemu-monitor,server,nowait		('socat /tmp/qemu-monitor STDIO')
   -monitor telnet:127.0.0.1:5023,server,nowait
   -daemonize		Detach process from stdio
-  -name			Set name for window title and VNC
 
 For more QEMU options type: $(basename ${0}) - --help
 
@@ -138,9 +144,33 @@ if [[ ${EXT} == "" ]]; then
 EXT="${1:(-4)}"
 fi
 
-# If any QEMU switches are supplied, override the corresponding config file options
+# Identify .raw and .iso simply by file extension and then force disk type
+case ${EXT} in
+
+.raw)
+DSK="-drive format=raw,file="
+;;
+
+.iso)
+DSK="-cdrom "
+;;
+
+*)
+DSK="-hda "
+;;
+
+esac
+
+# Define window title at this point
+NAM="$(basename -a ${1} 2>/dev/null)"
+
+# If QEMU switches are supplied, override the corresponding default options
 for ARG in ${@}; do
 case $ARG in
+
+-cpu)
+CPU=""
+;;
 
 -smp)
 SMP=""
@@ -166,29 +196,12 @@ NAM=""
 esac
 done
 
-# Identify .raw and .iso simply by file extension and force disk type
-case ${EXT} in
-
-.raw)
-DSK="-drive format=raw,file="
-;;
-
-.iso)
-DSK="-cdrom "
-;;
-
-*)
-DSK="-hda "
-;;
-
-esac
-
+# Define disk image here and then shift arguments
 IMG="${1}"
-NAM="$(basename -a ${1} 2>/dev/null)"
 shift
 echo ${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${OPT} ${@} ${DSK}\"${IMG}\"
 
-# Execute based on whether '-name' is specified
+# Execute QEMU based on whether '-name' is specified
 if [[ ${NAM} == "" ]]; then
 ${CMD} ${CPU} ${SMP} ${RAM} ${NIC} ${SND} ${OPT} ${@} ${DSK}"${IMG}"
 else
