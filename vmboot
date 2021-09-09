@@ -128,7 +128,7 @@ Some common QEMU [-opt]ions:
   -nographic		No GUI / command line only (output and Monitor in host console)
   -monitor stdio	Monitor in host console
   -monitor unix:/tmp/qemu-monitor,server,nowait		('socat /tmp/qemu-monitor STDIO')
-  -monitor telnet:127.0.0.1:5023,server,nowait
+  -monitor telnet::5023,server,nowait
   -daemonize		Detach process from stdio
 
 For more QEMU options type: $(basename ${0}) - --help
@@ -180,7 +180,7 @@ SMP=""
 RAM=""
 ;;
 
--nic)
+-nic|-netdev)
 NIC=""
 ;;
 
