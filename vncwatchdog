@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+# Check if x11vnc process is running. Restart if it isn't.
+#
+
+check_interval=10
+run_cmd='x11vnc -usepw -forever -shared -nolookup'
+
+while true; do
+
+  if [[ -z $(pgrep -u ${USER} x11vnc) ]]; then
+    ${run_cmd}
+  fi
+
+  sleep ${check_interval}
+
+done
+
+##
