@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+# Check current DPI every n seconds; force x DPI if changed.
+#
+
+check_interval=60
+force_dpi=109
+
+while true; do
+
+  if [[ -z $(xdpyinfo | grep -E "${force_dpi}.*dots") ]]; then
+    xrandr --dpi ${force_dpi}
+  fi
+
+  sleep ${check_interval}
+
+done
+
+##
