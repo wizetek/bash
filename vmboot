@@ -2,8 +2,9 @@
 
 # vmboot - QEMU VM launch wrapper
 # configuration in ~/.config/vmbootrc
-# 2021-09-09 Tom Wizetek <tom@wizetek.com>
+# Tom Wizetek <tom@wizetek.com>
 
+VER="21.261"
 CFG="${HOME}/.config/$(basename ${0})rc"
 
 # Try to read config file
@@ -57,7 +58,7 @@ fi
 # If first argument is a switch instead of file name, handle it
 case ${1} in
 
--)
+--)
 shift
 exec ${CMD} ${@}
 ;;
@@ -70,6 +71,16 @@ shift
 -cd)
 EXT=".iso"
 shift
+;;
+
+-v|--version)
+echo "$(basename ${0}) v${VER}"
+exit 0
+;;
+
+--gen-ver)
+echo "VER=\"$(date +%y.%j)\""
+exit 0
 ;;
 
 -h|"")
@@ -90,15 +101,18 @@ ENDSHORTHELP
 exit 0
 ;;
 
---help|-help|help)
+--help)
 cat << ENDLONGHELP
 
-  $(basename ${0}) [-|-raw|-cd] diskimage.img [-opt] [-opt] [...]
+  $(basename ${0}) [-raw|-cd|--] diskimage.img [-opt] [-opt] [...]
 
 Optional first switch:
-  -		Pass everything that follows directly to QEMU
   -raw		Force raw format for disk image
   -cd		Force cdrom medium for disk image
+  --		Pass everything that follows directly to QEMU
+  -v		Show version
+  -h		Basic help
+  --help	Advanced help
 
 Some common QEMU [-opt]ions:
   -boot d		a b (FDD1 FDD2), c d (HDD1 HDD2), d (CDROM), n (NIC)
@@ -131,7 +145,7 @@ Some common QEMU [-opt]ions:
   -monitor telnet::5023,server,nowait
   -daemonize		Detach process from stdio
 
-For more QEMU options type: $(basename ${0}) - --help
+For more QEMU options type: $(basename ${0}) -- --help
 
 ENDLONGHELP
 exit 0
