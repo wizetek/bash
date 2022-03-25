@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#
+# 2022-02-25 Toggle xautolock + xlock (screensaver only) and DPMS by Tom Wizetek
+#
+
+dpms_state=$(xset q | awk '/DPMS is/ {print $3}')
+
+case ${dpms_state} in
+
+Disabled)
+  xautolock -enable
+  xset +dpms
+  notify-send "Display Saver ON" "Screen saver and power management enabled"
+;;
+
+Enabled)
+  xautolock -disable
+  xset -dpms
+  notify-send "Display Saver OFF" "Screen saver and power management disabled"
+;;
+
+esac
+
+##
