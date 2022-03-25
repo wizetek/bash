@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#
+# Cycle DPMS 2022-03-22 by Tom Wizetek
+#
+
+# 600 seconds = 10 minutes, 1200 seconds = 20 minutes, ...
+dpms_array=(0 600 900 1200 1800)
+#array_first=${dpms_array[0]}
+array_last=${dpms_array[-1]}
+current_dpms=$(xset q | awk '/Standby:/ {print $6}')
+
+for array_item in ${dpms_array[@]}; do
+
+  if [[ ${current_dpms} -ge ${array_last} ]]; then
+    break
+
+  elif [[ ${array_item} -le ${current_dpms} ]]; then
+    continue
+
+  else
+    break
+  fi
+
+done
+
+xset dpms 0 0 ${array_item}
+
+echo "DPMS Off: ${array_item} seconds"
+notify-send "DPMS Off time" "$((${array_item}/60)) minutes"
+
+##
