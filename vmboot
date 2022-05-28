@@ -4,7 +4,8 @@
 # configuration in ~/.config/vmbootrc
 # Tom Wizetek <tom@wizetek.com>
 
-VER="21.261"
+# --gen-ver
+VER="22.148"
 CFG="${HOME}/.config/$(basename ${0})rc"
 
 # Try to read config file
@@ -19,6 +20,7 @@ fi
 
 # If config file is not found, generate it
 elif [[ ! -e ${CFG} ]]; then
+mkdir -p ${HOME}/.config
 cat > ${CFG} << ENDCFGFILE
 # ${CFG}
 #
@@ -92,8 +94,8 @@ Basic usage:
 
 QEMU options used automatically based on file extension:
   -cdrom	for .iso
-  -hda		for .qcow2 .vdi .vmdk .vhdx .img ...
-  -drive file=	for .raw
+  -hda		for .qcow2 .vdi .vmdk .vhdx ...
+  -drive file=	for .raw .img
 
 For advanced usage type: $(basename ${0}) --help
 
@@ -158,10 +160,10 @@ if [[ ${EXT} == "" ]]; then
 EXT="${1:(-4)}"
 fi
 
-# Identify .raw and .iso simply by file extension and then force disk type
+# Identify .raw .img .iso simply by file extension and then force disk type
 case ${EXT} in
 
-.raw)
+.raw|.img)
 DSK="-drive format=raw,file="
 ;;
 
