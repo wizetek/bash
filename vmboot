@@ -20,7 +20,7 @@ fi
 
 # If config file is not found, generate it
 elif [[ ! -e ${CFG} ]]; then
-mkdir -p ${HOME}/.config
+mkdir -p "${HOME}/.config"
 cat > ${CFG} << ENDCFGFILE
 # ${CFG}
 #
