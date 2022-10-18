@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+
+# remotekeys
+# version 1.0
+# 2022-10-18 Tom Wizetek
+# Dependencies: bash, xdotool, xclip
+
+showHelp() {
+cat << HELP
+
+Space  play/pause
+ Left  skip back
+Right  skip forward
+   Up  volume up
+ Down  volume down
+  0-9  jump to position 0-90%
+  F11  full screen (browser)
+  f F  full screen (video)
+  m M  mute
+    G  move mouse
+    K  click in screen center
+    S  input string, copy & paste
+    T  Alt+Tab
+    Z  Alt+Left
+    X  Alt+Right
+    O  Ctrl+PgUp
+    P  Ctrl+PgDn
+    H  (this help)
+    Q  quit
+HELP
+}
+
+#
+
+# Blank Internal Field Separator for distinguishing space, tab, newline
+export IFS=
+export DISPLAY=:0
+
+#
+
+# Handle Ctrl+c
+trap '' INT
+
+showHelp
+
+while true
+do
+  # -s = silent, -r = handle backslash, -n1 = 1 character (-N1 breaks handling of the Enter key)
+  read -s -r -n 1 key_press
+
+  case ${key_press} in
+
+    # Pass all lowercase and numeric characters directly
+    [a-z0-9]) xdotool key ${key_press} ;;
+
+    M) xdotool key m ;;
+    F) xdotool key f ;;
+
+    G) xdotool mousemove 200 200 ;;
+    K) xdotool mousemove 960 540 click 1 mousemove restore ;;
+
+    T) xdotool key alt+Tab ;;
+
+    Z) xdotool key alt+Left ;;
+    X) xdotool key alt+Right ;;
+
+    O) xdotool key ctrl+Page_Up ;;
+    P) xdotool key ctrl+Page_Down ;;
+
+    '') xdotool key Return ;;
+    #' ') xdotool key space ;;
+    $'\x20') xdotool key space ;;
+    $'\x09') xdotool key Tab ;;
+    $'\x08') xdotool key BackSpace ;;
+    # For Android keyboard
+    $'\x7f') xdotool key BackSpace ;;
+
+    $'\x01') xdotool key ctrl+a ;;
+    $'\x02') xdotool key ctrl+b ;;
+    $'\x03') xdotool key ctrl+c ;;
+    $'\x04') xdotool key ctrl+d ;;
+    $'\x05') xdotool key ctrl+e ;;
+    $'\x06') xdotool key ctrl+f ;;
+    $'\x07') xdotool key ctrl+g ;;
+    $'\x08') xdotool key ctrl+h ;;
+    $'\x09') xdotool key ctrl+i ;;
+    $'\x0a') xdotool key ctrl+j ;;
+    $'\x0b') xdotool key ctrl+k ;;
+    $'\x0c') xdotool key ctrl+l ;;
+    $'\x0d') xdotool key ctrl+m ;;
+    $'\x0e') xdotool key ctrl+n ;;
+    $'\x0f') xdotool key ctrl+o ;;
+    $'\x10') xdotool key ctrl+p ;;
+    $'\x11') xdotool key ctrl+q ;;
+    $'\x12') xdotool key ctrl+r ;;
+    $'\x13') xdotool key ctrl+s ;;
+    $'\x14') xdotool key ctrl+t ;;
+    $'\x15') xdotool key ctrl+u ;;
+    $'\x16') xdotool key ctrl+v ;;
+    $'\x17') xdotool key ctrl+w ;;
+    $'\x18') xdotool key ctrl+x ;;
+    $'\x19') xdotool key ctrl+y ;;
+    $'\x1a') xdotool key ctrl+z ;;
+
+    '!') xdotool key exclam ;;
+    '@') xdotool key at ;;
+    '#') xdotool key numbersign ;;
+    '$') xdotool key dollar ;;
+    '%') xdotool key percent ;;
+    '^') xdotool key asciicircum ;;
+    '&') xdotool key ampersand ;;
+    '*') xdotool key asterisk ;;
+    '(') xdotool key parenleft ;;
+    ')') xdotool key parenright ;;
+    '-') xdotool key minus ;;
+    '+') xdotool key plus ;;
+    '_') xdotool key underscore ;;
+    '=') xdotool key equal ;;
+    '[') xdotool key bracketleft ;;
+    ']') xdotool key bracketright ;;
+    '{') xdotool key braceleft ;;
+    '}') xdotool key braceright ;;
+    '\') xdotool key backslash ;;
+    '|') xdotool key bar ;;
+    ':') xdotool key colon ;;
+    ';') xdotool key semicolon ;;
+    '"') xdotool key quotedbl ;;
+    "'") xdotool key apostrophe ;;
+    ',') xdotool key comma ;;
+    '.') xdotool key period ;;
+    '?') xdotool key question ;;
+    '<') xdotool key less ;;
+    '>') xdotool key greater ;;
+    '/') xdotool key slash ;;
+    '~') xdotool key asciitilde ;;
+    '`') xdotool key grave ;;
+
+    # Escape sequences
+
+    $'\x1b')
+    # -t = necessary unnoticeable timeout for handling the Escape key alone
+    read -s -n 1 -t 0.001 esc_seq
+
+    if [[ ${esc_seq} == '' ]]; then
+      xdotool key Escape
+    else
+
+      # Read again
+      read -s -n 1 esc_seq
+      case ${esc_seq} in
+
+        'D') xdotool key Left ;;
+        'C') xdotool key Right ;;
+        'A') xdotool key Up ;;
+        'B') xdotool key Down ;;
+        'H') xdotool key Home ;;
+        'F') xdotool key End ;;
+        '5') xdotool key Page_Up ;;
+        '6') xdotool key Page_Down ;;
+        '3') xdotool key Delete ;;
+
+        # F11 function key
+
+        '2')
+             read -s -n 2 esc_seq
+             if [[ ${esc_seq} == '3~' ]]; then
+               xdotool key F11
+             fi
+             ;;
+      esac
+
+      # Read again with fast timeout but don't store to flush buffer (for handling Delete)
+      read -s -n 1 -t 0.001
+
+    fi
+    ;;
+
+    # Prompt for a text string, copy to clipboard, and paste
+
+    S) 
+       # -e = readline, -p = prompt
+       read -e -p 'string: ' input_string
+
+       if [[ ${input_string} == '' ]]; then
+         echo "empty"
+       else
+         echo ${input_string} | xclip -selection clipboard
+         xdotool key ctrl+v
+       fi
+       ;;
+
+    H) showHelp ;;
+    Q) exit ;;
+
+  esac
+done
+
+##
