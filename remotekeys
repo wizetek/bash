@@ -8,6 +8,7 @@
 showHelp() {
 cat << HELP
 
+Enter, Tab, Escape, Ctrl+<key>
 Space  play/pause
  Left  skip back
 Right  skip forward
