@@ -21,6 +21,7 @@ Right  skip forward
     G  move mouse
     K  click in screen center
     S  input string, copy & paste
+    E  Shift+Tab
     T  Alt+Tab
     Z  Alt+Left
     X  Alt+Right
@@ -60,6 +61,7 @@ do
     G) xdotool mousemove 200 200 ;;
     K) xdotool mousemove 960 540 click 1 mousemove restore ;;
 
+    E) xdotool key shift+Tab ;;
     T) xdotool key alt+Tab ;;
 
     Z) xdotool key alt+Left ;;
