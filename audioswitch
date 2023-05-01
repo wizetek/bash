@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+## Tom Wizetek 2022-04-11, 2023-03-18
+## Cycle through preferred audio outputs
+## xbindkeys: Super/Win + a
+
+# Functions
+audioOutHDMI() {
+  pactl set-card-profile $BUILTIN output:hdmi-stereo
+  pactl set-default-sink ${BUILTIN/_card/_output}.hdmi-stereo
+}
+
+audioOutBuiltInAnalog() {
+  pactl set-card-profile $BUILTIN output:analog-stereo
+  pactl set-default-sink ${BUILTIN/_card/_output}.analog-stereo.2
+}
+
+audioOutEdifierUSB() {
+  pactl set-card-profile $EDIFIER output:analog-stereo
+  pactl set-default-sink ${EDIFIER/_card/_output}.analog-stereo
+}
+
+audioOutSteinbergUSB() {
+  pactl set-card-profile $STEINBERG output:analog-stereo
+  pactl set-default-sink ${STEINBERG/_card/_output}.analog-stereo.2
+}
+
+# Set a variable identifying each audio card
+for i in $(pactl list cards short); do
+  case $i in
+    *pci*) BUILTIN=$i ;;
+    *EDIFIER*) EDIFIER=$i ;;
+    *Steinberg*) STEINBERG=$i ;;
+  esac
+done
+
+# Cycle through audio outputs in sequence
+case $(pactl get-default-sink) in
+
+  # Switch from Analog to Edifier
+  alsa_output.pci-*.analog-stereo*)
+    audioOutEdifierUSB
+    notify-send "Audio output" "Edifier"
+  ;;
+
+  # Switch from Edifier to Steinberg
+  alsa_output.usb-*EDIFIER*.analog-stereo*)
+    audioOutSteinbergUSB
+    notify-send "Audio output" "Steinberg"
+  ;;
+
+  # Switch from Steinberg to Analog
+  alsa_output.usb-*Steinberg*.analog-stereo*)
+    audioOutBuiltInAnalog
+    notify-send "Audio output" "Analog"
+  ;;
+
+#  # Switch from Analog to HDMI
+#  alsa_output.pci-*.analog-stereo.2)
+#    audioOutHDMI
+#    notify-send "Audio output" "HDMI"
+#  ;;
+
+esac
+
+##
