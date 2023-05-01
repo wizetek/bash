@@ -11,13 +11,13 @@ case ${dpms_state} in
 Disabled)
   xautolock -enable
   xset +dpms
-  notify-send "Display Saver ON" "Screen saver and power management enabled"
+  notify-send "Display saver ON" "Enabled screensaver and DPMS"
 ;;
 
 Enabled)
   xautolock -disable
   xset -dpms
-  notify-send "Display Saver OFF" "Screen saver and power management disabled"
+  notify-send "Display Saver OFF" "Disabled screensaver and DPMS"
 ;;
 
 esac
