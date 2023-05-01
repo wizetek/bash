@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Tom Wizetek 2023-05-01
+# Toggle xautolock2 (suspend)
+# xbindkeys: Super/Win + h
+
+SLEEP_BIN=xautolock2
+SLEEP_PROC=$(pgrep -u $UID -x $SLEEP_BIN)
+SLEEP_FILE=$HOME/.config/sleep-state
+
+# Exit if process is not running
+if [[ ! $SLEEP_PROC ]]; then
+  notify-send "System sleep" "Process is not running"
+  exit 1
+fi
+
+# Read saved state from file
+SLEEP_STATE=$(cat $SLEEP_FILE)
+
+# Toggle state and save in file
+case $SLEEP_STATE in
+
+  enabled)
+  $SLEEP_BIN -disable
+  echo "disabled" > $SLEEP_FILE
+  notify-send "System sleep OFF" "Disabled suspend-on-idle"
+  ;;
+
+  disabled|*)
+  $SLEEP_BIN -enable
+  echo "enabled" > $SLEEP_FILE
+  notify-send "System sleep ON" "Enabled suspend-on-idle"
+  ;;
+
+esac
+
+##
