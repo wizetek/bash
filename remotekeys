@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # remotekeys
-# version 1.0
-# 2022-10-18 Tom Wizetek
+# version 1.1 2023-12-28
+# version 1.0 2022-10-15
+# Tom Wizetek
 # Dependencies: bash, xdotool, xclip
 
 showHelp() {
@@ -17,6 +18,7 @@ Right  skip forward
   0-9  jump to position 0-90%
   F11  full screen (browser)
   f F  full screen (video)
+    V  Firefox pop out video
   m M  mute
     G  move mouse
     K  click in screen center
@@ -53,10 +55,15 @@ do
   case ${key_press} in
 
     # Pass all lowercase and numeric characters directly
-    [a-z0-9]) xdotool key ${key_press} ;;
+    # FIXME Temporarily disabled numbers 2023-09-22
+    #[a-z0-9]) xdotool key ${key_press} ;;
+    [a-z]) xdotool key ${key_press} ;;
 
     M) xdotool key m ;;
     F) xdotool key f ;;
+
+    # Firefox pop out picture-in-picture video
+    V) xdotool key ctrl+shift+bracketright ;;
 
     G) xdotool mousemove 200 200 ;;
     K) xdotool mousemove 960 540 click 1 mousemove restore ;;
