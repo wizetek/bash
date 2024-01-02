@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # remotekeys
+# version 1.2 2024-01-01
 # version 1.1 2023-12-28
 # version 1.0 2022-10-15
 # Tom Wizetek
@@ -19,7 +20,7 @@ Right  skip forward
   F11  full screen (browser)
   f F  full screen (video)
     V  Firefox pop out video
-  m M  mute
+  m M  mute / Ctrl+m
     G  move mouse
     K  click in screen center
     S  input string, copy & paste
@@ -59,7 +60,9 @@ do
     #[a-z0-9]) xdotool key ${key_press} ;;
     [a-z]) xdotool key ${key_press} ;;
 
-    M) xdotool key m ;;
+    # Firefox mute tab
+    M) xdotool key ctrl+m ;;
+
     F) xdotool key f ;;
 
     # Firefox pop out picture-in-picture video
