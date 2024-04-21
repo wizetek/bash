@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
-# Tom Wizetek <tom@wizetek.com> 2021-05-24, 2023-02-07, 2024-04-07
+# sleepnoise
+# GNU General Public License
+# Tom Wizetek <tom@wizetek.com>
+#
+# updates:
+# 2021-05-24
+# 2023-02-07
+# 2024-04-07
+# 2024-04-21
 #
 # SoX args:
 # [q]uiet
@@ -25,8 +33,9 @@
 
 SYNTH1="whitenoise vol -20dB"
 SYNTH2="pinknoise vol -0dB treble -10 bass -20"
-SYNTH3="brownnoise tremolo 0.3 60 vol -0dB"
+SYNTH3="brownnoise tremolo 0.3 60 vol -2dB"
 SYNTH4="sine 60 tremolo 2 90 vol -10dB"
+SYNTH5=""
 ARGS="fade t 2"
 #SOX_ARGS="--no-show-progress -V0 --guard --null"
 SOX_ARGS="-q -V0 -G -n"
@@ -41,21 +50,20 @@ clearPID() {
 }
 
 playNoise() {
-  play ${SOX_ARGS} synth ${SYNTH1} ${ARGS} &
-  addPID
-
-  play ${SOX_ARGS} synth ${SYNTH2} ${ARGS} &
-  addPID
-
-  play ${SOX_ARGS} synth ${SYNTH3} ${ARGS} &
-  addPID
-
-  play ${SOX_ARGS} synth ${SYNTH4} ${ARGS} &
-  addPID
+  for n in {1..20}; do
+    SYNTH_VAR="SYNTH${n}"
+    SYNTH="${!SYNTH_VAR}"
+    if [[ -n ${SYNTH} ]]; then
+      play ${SOX_ARGS} synth ${SYNTH} ${ARGS} &
+      addPID
+    fi
+  done
 }
 
 killNoise() {
-  [[ ! -f ${SAVED_PID} ]] && touch ${SAVED_PID}
+  if [[ ! -f ${SAVED_PID} ]]; then
+    touch ${SAVED_PID}
+  fi
 
   while read READ_PID; do
     kill ${KILL_SIG} ${READ_PID}
@@ -73,6 +81,14 @@ toggleNoise() {
   fi
 }
 
+# Check for SoX
+if [[ -z $(which sox) ]]; then
+  echo "SoX: binary not found in path"
+  echo "https://sox.sourceforge.io"
+  exit 1 
+fi
+
+# MAIN
 case ${1} in
 
 -h|*help)
