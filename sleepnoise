@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-# Tom Wizetek <tom@wizetek.com> 2021-05-24, 2023-02-07, 2024-04-07
+# Tomek 2021-05-24, 2023-02-07, 2024-04-07
 #
 # SoX args:
 # [q]uiet
 # [V]erbosity level
 # [G]uard against clipping via gain effect
-#   G = gain -h gain -r
-#     -h = headroom
-#     -r = reclaim
+#	G = gain -h gain -r
+#		-h = headroom
+#		-r = reclaim
 # [n]ull input/output file (for synth)
 #
 # synth:
@@ -16,15 +16,17 @@
 # vol headroom to avoid clipping: >3dB
 # treble/bass <gain> useful values: -20<0<+20
 # tremolo <speed> [depth]
+#       depth default = 40
 # fade [type] <length>
-#   t = triangular/linear type
+#	t = triangular/linear type
 #
 # example:
 # play -q -V0 -G -n synth pinknoise vol -3dB treble -10 bass -3 fade t 2
 
-SYNTH1="whitenoise vol -90dB tremolo .3 90"
-SYNTH2="pinknoise vol -3dB treble -10 bass -3"
-SYNTH3="brownnoise vol -90dB"
+SYNTH1="whitenoise vol -20dB"
+SYNTH2="pinknoise vol -0dB treble -10 bass -20"
+SYNTH3="brownnoise tremolo 0.3 60 vol -0dB"
+SYNTH4="sine 60 tremolo 2 90 vol -10dB"
 ARGS="fade t 2"
 #SOX_ARGS="--no-show-progress -V0 --guard --null"
 SOX_ARGS="-q -V0 -G -n"
@@ -46,6 +48,9 @@ playNoise() {
   addPID
 
   play ${SOX_ARGS} synth ${SYNTH3} ${ARGS} &
+  addPID
+
+  play ${SOX_ARGS} synth ${SYNTH4} ${ARGS} &
   addPID
 }
 
