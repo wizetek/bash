@@ -33,8 +33,8 @@
 
 SYNTH1="whitenoise vol -20dB"
 SYNTH2="pinknoise vol -0dB treble -10 bass -20"
-SYNTH3="brownnoise tremolo 0.3 60 vol -2dB"
-SYNTH4="sine 60 tremolo 2 90 vol -10dB"
+SYNTH3="brownnoise vol -0dB tremolo 0.35 60"
+SYNTH4="sine 55 vol -6dB tremolo 2 90"
 SYNTH5=""
 ARGS="fade t 2"
 #SOX_ARGS="--no-show-progress -V0 --guard --null"
