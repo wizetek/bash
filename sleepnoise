@@ -31,9 +31,11 @@
 # example:
 # play -q -V0 -G -n synth pinknoise vol -3dB treble -10 bass -3 fade t 2
 
+# Variables
 SYNTH1="whitenoise vol -20dB"
 SYNTH2="pinknoise vol -0dB treble -10 bass -20"
-SYNTH3="brownnoise vol -0dB tremolo 0.35 60"
+SYNTH3="brownnoise vol -0dB"
+#SYNTH3="brownnoise vol -0dB tremolo 0.28 60"
 SYNTH4="sine 55 vol -6dB tremolo 2 90"
 SYNTH5=""
 ARGS="fade t 2"
@@ -41,6 +43,7 @@ ARGS="fade t 2"
 SOX_ARGS="-q -V0 -G -n"
 SAVED_PID="/tmp/$(basename ${0})-${UID}"
 
+# Functions
 addPID() {
   echo ${!} >> ${SAVED_PID}
 }
@@ -81,7 +84,7 @@ toggleNoise() {
   fi
 }
 
-# Check for SoX
+# Dependency check for SoX
 if [[ -z $(which sox) ]]; then
   echo "SoX: binary not found in path"
   echo "https://sox.sourceforge.io"
