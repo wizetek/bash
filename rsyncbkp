@@ -1,2 +1,0 @@
-#rsync -aHAXS --delete --info=progress2 --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","/swapfile","/boot/efi/*","/home/*"} src:/ /mnt/dst_root/
-#rsync -aHAXS --delete --info=progress2 src:/home/ /mnt/dst_home/
